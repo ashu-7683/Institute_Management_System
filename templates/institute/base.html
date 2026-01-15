@@ -578,6 +578,16 @@
                         <span>Manage Users</span>
                     </a>
                 </li>
+                {% if user.user_type == 'admin' %}
+                <!-- Search Admission (Only for admin users) -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'search-admission' in request.path %}active{% endif %}" 
+                    href="{% url 'search_admission' %}">
+                        <i class="nav-icon fas fa-search"></i>
+                        <span>Search Admission</span>
+                    </a>
+                </li>
+                {% endif %}
                 {% endif %}
                 
                 <!-- Additional menu items for logged-in users -->

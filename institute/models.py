@@ -83,3 +83,6 @@ class Admission(models.Model):
     
     def __str__(self):
         return f"{self.student_name} - {self.enrolled_for}"
+    
+    # class Meta:
+    #     ordering = ['-created_at']

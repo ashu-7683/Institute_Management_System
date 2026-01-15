@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.contrib import messages
 from .models import CustomUser, Admission
 from .forms import UserRegistrationForm, AdmissionForm, UserLoginForm
 from django.db.models import Q
+import json
 
 def home(request):
     return render(request, 'institute/index.html')
@@ -63,6 +66,48 @@ def manage_users(request):
     
     users = CustomUser.objects.all().order_by('id')
     return render(request, 'institute/manage_users.html', {'users': users})
+
+@login_required
+def edit_user(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(user, id=user_id)
+        
+        # Update user fields
+        user.uid = request.POST.get('uid')
+        user.username = request.POST.get('username')
+        user.user_type = request.POST.get('user_type')
+        user.store_name = request.POST.get('store_name')
+        user.status = request.POST.get('status')
+        
+        # Update password only if provided
+        password = request.POST.get('password')
+        if password:
+            user.set_password(password)
+        
+        user.save()
+        messages.success(request, f'User {user.username} updated successfully!')
+        return redirect('manage_users')
+    
+    return redirect('manage_users')
+
+
+@csrf_exempt
+@login_required
+def delete_user(request, user_id):
+    if request.method == 'POST':
+        try:
+            user = get_object_or_404(user, id=user_id)
+            
+            # Prevent deleting yourself
+            if user == request.user:
+                return JsonResponse({'success': False, 'error': 'You cannot delete your own account.'})
+            
+            user.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 def admission_form(request):
     if request.method == 'POST':
