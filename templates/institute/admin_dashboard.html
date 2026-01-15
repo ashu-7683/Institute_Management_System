@@ -47,11 +47,10 @@
                 </div>
             </div>
         </div>
-        
     </div>
     
     <!-- Quick Links -->
-    <div class="row">
+    <div class="row mb-5">
         <div class="col-md-4 mb-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
@@ -62,16 +61,6 @@
                 </div>
             </div>
         </div>
-        {% comment %} <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
-                    <h5>Register User</h5>
-                    <p class="text-muted">Register new users</p>
-                    <a href="{% url 'register' %}" class="btn btn-success">Register</a>
-                </div>
-            </div>
-        </div> {% endcomment %}
         <div class="col-md-4 mb-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
@@ -93,7 +82,345 @@
             </div>
         </div>
     </div>
+    
+    <!-- View Admissions Section -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-2 mb-md-0" style="color: #1e3a8a;">
+                    <i class="fas fa-graduation-cap me-2"></i>View Admissions
+                </h4>
+                <form method="GET" action="{% url 'admin_dashboard' %}" class="d-flex flex-wrap gap-2" style="max-width: 400px;">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" value="{{ search_query }}" placeholder="Search students..." aria-label="Search admissions">
+                        <button class="btn btn-outline-primary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        {% if search_query %}
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if admissions %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="admissionsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Student Name</th>
+                            <th>Father's Name</th>
+                            <th>Mobile</th>
+                            <th>Course</th>
+                            <th>Applied Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admission in admissions %}
+                        <tr>
+                            <td>{{ admission.id }}</td>
+                            <td>
+                                <strong>{{ admission.student_name }}</strong>
+                                {% if admission.adhaar_number %}
+                                <br><small class="text-muted">Aadhaar: {{ admission.adhaar_number }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ admission.father_name }}</td>
+                            <td>
+                                {{ admission.mobile_number }}
+                                {% if admission.whatsapp_number %}
+                                <br><small class="text-muted">WhatsApp: {{ admission.whatsapp_number }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ admission.course }}</td>
+                            <td>{{ admission.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary view-details-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#studentDetailsModal"
+                                            data-id="{{ admission.id }}"
+                                            data-name="{{ admission.student_name }}"
+                                            data-father="{{ admission.father_name }}"
+                                            data-mother="{{ admission.mother_name }}"
+                                            data-dob="{{ admission.date_of_birth|date:'d/m/Y' }}"
+                                            data-mobile="{{ admission.mobile_number }}"
+                                            data-whatsapp="{{ admission.whatsapp_number }}"
+                                            data-aadhaar="{{ admission.adhaar_number }}"
+                                            data-address="{{ admission.address }}"
+                                            data-course="{{ admission.course }}"
+                                            data-college="{{ admission.college_name }}"
+                                            data-roll="{{ admission.college_roll_no }}"
+                                            data-batch="{{ admission.batch }}"
+                                            data-date="{{ admission.created_at|date:'d/m/Y' }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="{% url 'search_admission' %}?search={{ admission.student_name }}" 
+                                        class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if admissions.has_other_pages %}
+            <nav aria-label="Admissions pagination">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if admissions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ admissions.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in admissions.paginator.page_range %}
+                        {% if admissions.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% elif i > admissions.number|add:'-3' and i < admissions.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if admissions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ admissions.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                    </li>
+                    {% endif %}
+                </ul>
+                <p class="text-center text-muted mt-2">
+                    Showing {{ admissions.start_index }} to {{ admissions.end_index }} of {{ admissions.paginator.count }} admissions
+                </p>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-user-graduate fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Admissions Found</h5>
+                <p class="text-muted">
+                    {% if search_query %}
+                    No admissions found for "{{ search_query }}". Try a different search term.
+                    {% else %}
+                    There are no admission records in the system yet.
+                    {% endif %}
+                </p>
+                {% if search_query %}
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">
+                    <i class="fas fa-redo me-2"></i>Clear Search
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<!-- Student Details Modal -->
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentDetailsModalLabel">Student Admission Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
+                        <div class="mb-2">
+                            <small class="text-muted">Student Name:</small>
+                            <p class="mb-0 fw-bold" id="detail-name">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Father's Name:</small>
+                            <p class="mb-0" id="detail-father">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Mother's Name:</small>
+                            <p class="mb-0" id="detail-mother">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Date of Birth:</small>
+                            <p class="mb-0" id="detail-dob">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Mobile Number:</small>
+                            <p class="mb-0" id="detail-mobile">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">WhatsApp Number:</small>
+                            <p class="mb-0" id="detail-whatsapp">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="border-bottom pb-2 mb-3">Academic Information</h6>
+                        <div class="mb-2">
+                            <small class="text-muted">Course:</small>
+                            <p class="mb-0 fw-bold" id="detail-course">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">College Name:</small>
+                            <p class="mb-0" id="detail-college">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">College Roll No:</small>
+                            <p class="mb-0" id="detail-roll">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Batch:</small>
+                            <p class="mb-0" id="detail-batch">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Aadhaar Number:</small>
+                            <p class="mb-0" id="detail-aadhaar">-</p>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-muted">Applied Date:</small>
+                            <p class="mb-0" id="detail-date">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">Address</h6>
+                        <p class="mb-0" id="detail-address">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="editAdmissionBtn">
+                    <i class="fas fa-edit me-2"></i>Edit Admission
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        color: #1e3a8a;
+        font-weight: 600;
+        border-top: none;
+        white-space: nowrap;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .card-header {
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .view-details-btn:hover {
+        background-color: #1e3a8a;
+        color: white;
+    }
+    
+    .pagination .page-link {
+        color: #1e3a8a;
+        border: 1px solid #dee2e6;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #1e3a8a;
+        border-color: #1e3a8a;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View details modal functionality
+        const viewButtons = document.querySelectorAll('.view-details-btn');
+        const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
+        const editBtn = document.getElementById('editAdmissionBtn');
+        
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const admissionId = this.getAttribute('data-id');
+                const studentName = this.getAttribute('data-name');
+                const fatherName = this.getAttribute('data-father');
+                const motherName = this.getAttribute('data-mother');
+                const dob = this.getAttribute('data-dob');
+                const mobile = this.getAttribute('data-mobile');
+                const whatsapp = this.getAttribute('data-whatsapp');
+                const aadhaar = this.getAttribute('data-aadhaar');
+                const address = this.getAttribute('data-address');
+                const course = this.getAttribute('data-course');
+                const college = this.getAttribute('data-college');
+                const roll = this.getAttribute('data-roll');
+                const batch = this.getAttribute('data-batch');
+                const appliedDate = this.getAttribute('data-date');
+                
+                // Populate modal
+                document.getElementById('detail-name').textContent = studentName;
+                document.getElementById('detail-father').textContent = fatherName;
+                document.getElementById('detail-mother').textContent = motherName;
+                document.getElementById('detail-dob').textContent = dob;
+                document.getElementById('detail-mobile').textContent = mobile;
+                document.getElementById('detail-whatsapp').textContent = whatsapp || 'Not provided';
+                document.getElementById('detail-aadhaar').textContent = aadhaar || 'Not provided';
+                document.getElementById('detail-address').textContent = address || 'Not provided';
+                document.getElementById('detail-course').textContent = course;
+                document.getElementById('detail-college').textContent = college;
+                document.getElementById('detail-roll').textContent = roll;
+                document.getElementById('detail-batch').textContent = batch;
+                document.getElementById('detail-date').textContent = appliedDate;
+                
+                // Set edit button URL
+                if (admissionId) {
+                    editBtn.onclick = function() {
+                        window.location.href = "{% url 'search_admission' %}?search=" + encodeURIComponent(studentName);
+                    };
+                }
+            });
+        });
+        
+        // Auto focus search input if search query exists
+        {% if search_query %}
+        document.querySelector('input[name="search"]').focus();
+        {% endif %}
+        
+        // Confirmation for delete actions (if any are added later)
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to delete this admission?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
 
 <!-- Note: Don't add copyright block here - base template will handle it -->

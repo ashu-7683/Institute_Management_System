@@ -7,6 +7,7 @@ from django.contrib import messages
 from .models import CustomUser, Admission
 from .forms import UserRegistrationForm, AdmissionForm, UserLoginForm
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
 
 def home(request):
@@ -52,10 +53,37 @@ def admin_dashboard(request):
     total_students = CustomUser.objects.filter(user_type='student').count()
     total_admissions = Admission.objects.count()
     
+    # Get admissions with pagination and search
+    admissions_list = Admission.objects.all().order_by('-created_at')
+    
+    # Handle search
+    search_query = request.GET.get('search', '')
+    if search_query:
+        admissions_list = admissions_list.filter(
+            Q(student_name__icontains=search_query) |
+            Q(father_name__icontains=search_query) |
+            Q(mobile_number__icontains=search_query) |
+            Q(adhaar_number__icontains=search_query) |
+            Q(college_roll_no__icontains=search_query)
+        )
+    
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(admissions_list, 10)  # Show 10 admissions per page
+    
+    try:
+        admissions = paginator.page(page)
+    except PageNotAnInteger:
+        admissions = paginator.page(1)
+    except EmptyPage:
+        admissions = paginator.page(paginator.num_pages)
+    
     context = {
         'total_users': total_users,
         'total_students': total_students,
         'total_admissions': total_admissions,
+        'admissions': admissions,
+        'search_query': search_query,
     }
     return render(request, 'institute/admin_dashboard.html', context)
 
@@ -70,13 +98,12 @@ def manage_users(request):
 @login_required
 def edit_user(request, user_id):
     if request.method == 'POST':
-        user = get_object_or_404(user, id=user_id)
+        user = get_object_or_404(CustomUser, id=user_id)
         
         # Update user fields
         user.uid = request.POST.get('uid')
         user.username = request.POST.get('username')
         user.user_type = request.POST.get('user_type')
-        user.store_name = request.POST.get('store_name')
         user.status = request.POST.get('status')
         
         # Update password only if provided
@@ -96,7 +123,7 @@ def edit_user(request, user_id):
 def delete_user(request, user_id):
     if request.method == 'POST':
         try:
-            user = get_object_or_404(user, id=user_id)
+            user = get_object_or_404(CustomUser, id=user_id)
             
             # Prevent deleting yourself
             if user == request.user:
