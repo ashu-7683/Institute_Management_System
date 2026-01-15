@@ -1,0 +1,88 @@
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <h1 class="mb-4" style="color: #1e3a8a;">
+        <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+    </h1>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Users</h6>
+                            <h2 class="card-text text-primary">{{ total_users }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-3x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Students</h6>
+                            <h2 class="card-text text-success">{{ total_students }}</h2>
+                        </div>
+                        <i class="fas fa-graduation-cap fa-3x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Admissions</h6>
+                            <h2 class="card-text text-warning">{{ total_admissions }}</h2>
+                        </div>
+                        <i class="fas fa-file-alt fa-3x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Links -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users-cog fa-3x text-primary mb-3"></i>
+                    <h5>Manage Users</h5>
+                    <p class="text-muted">Add, edit, or remove users</p>
+                    <a href="{% url 'manage_users' %}" class="btn btn-primary">Go to Users</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                    <h5>Register User</h5>
+                    <p class="text-muted">Register new users</p>
+                    <a href="{% url 'register' %}" class="btn btn-success">Register</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-signature fa-3x text-warning mb-3"></i>
+                    <h5>Admissions</h5>
+                    <p class="text-muted">View admission forms</p>
+                    <a href="{% url 'admission_form' %}" class="btn btn-warning">View Forms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Note: Don't add copyright block here - base template will handle it -->

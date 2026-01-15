@@ -1,0 +1,85 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+class CustomUser(AbstractUser):
+    USER_TYPE_CHOICES = (
+        ('admin', 'Admin'),
+        ('user', 'User'),
+        ('student', 'Student'),
+    )
+    
+    uid = models.CharField(max_length=50, unique=True)
+    mobile = models.CharField(max_length=15, blank=True, null=True)
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='student')
+    status = models.CharField(max_length=20, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.username} - {self.user_type}"
+
+class Admission(models.Model):
+    student_name = models.CharField(max_length=100)
+    father_name = models.CharField(max_length=100)
+    mother_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField()
+    mobile_number = models.CharField(max_length=15)
+    address = models.TextField()
+    adhaar_number = models.CharField(max_length=20)
+    whatsapp_number = models.CharField(max_length=15)
+    blood_group = models.CharField(max_length=5)
+    category = models.CharField(max_length=50)
+    
+    # College details
+    college_name = models.CharField(max_length=200)
+    board_name = models.CharField(max_length=100)
+    college_roll_no = models.CharField(max_length=50)
+    batch = models.CharField(max_length=50)
+    eleventh_year = models.CharField(max_length=10)
+    twelfth_year = models.CharField(max_length=10)
+    course = models.CharField(max_length=100)
+    
+    # Enrollment
+    enrolled_for = models.CharField(max_length=100)
+    sams_login_id = models.CharField(max_length=100, blank=True)
+    sams_password = models.CharField(max_length=100, blank=True)
+    pen_number = models.CharField(max_length=100, blank=True)
+    apaar_id = models.CharField(max_length=100, blank=True)
+    
+    # Visitors
+    visitor1_name = models.CharField(max_length=100, blank=True)
+    visitor1_relation = models.CharField(max_length=100, blank=True)
+    visitor1_contact = models.CharField(max_length=15, blank=True)
+    visitor2_name = models.CharField(max_length=100, blank=True)
+    visitor2_relation = models.CharField(max_length=100, blank=True)
+    visitor2_contact = models.CharField(max_length=15, blank=True)
+    
+    # Fees and facilities
+    hostel_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    academics_accommodation = models.TextField(blank=True)
+    admitted_college_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    college_dress = models.CharField(max_length=100, blank=True)
+    books = models.CharField(max_length=100, blank=True)
+    college_transportation = models.CharField(max_length=100, blank=True)
+    tms_dress = models.CharField(max_length=100, blank=True)
+    
+    # Installments
+    installment1 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    installment2 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    installment3 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    installment4 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    installment5 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    installment6 = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    tms_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    # Signatures (in real app, these would be FileFields)
+    guardian_signature = models.CharField(max_length=100, blank=True)
+    student_signature = models.CharField(max_length=100, blank=True)
+    tms_signature = models.CharField(max_length=100, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    submitted_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.student_name} - {self.enrolled_for}"

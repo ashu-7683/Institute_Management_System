@@ -1,0 +1,78 @@
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="color: #1e3a8a;">
+            <i class="fas fa-users-cog me-2"></i>MANAGE USERS
+        </h1>
+        <a href="{% url 'register' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i> Create New User
+        </a>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>SL No.</th>
+                    <th>Edit</th>
+                    <th>UID</th>
+                    <th>NAME</th>
+                    <th>PASSWORD</th>
+                    <th>TYPE</th>
+                    <th>PURPOSE</th>
+                    <th>STATUS</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ user.id }}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                    <td>{{ user.uid }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>••••••</td>
+                    <td>
+                        <span class="badge bg-{% if user.user_type == 'admin' %}danger{% elif user.user_type == 'student' %}success{% else %}info{% endif %}">
+                            {{ user.user_type|upper }}
+                        </span>
+                    </td>
+                    <td>{{ user.store_name|default:"-" }}</td>
+                    <td>
+                        <span class="badge bg-{% if user.status == 'active' %}success{% else %}secondary{% endif %}">
+                            {{ user.status|upper }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No users found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        alert('User deletion functionality would be implemented here');
+    }
+}
+</script>
+{% endblock %}
+
+<!-- REMOVED: The extra copyright block that was causing duplication -->

@@ -1,0 +1,215 @@
+{% extends 'institute/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">
+                <i class="fas fa-file-alt"></i> THE MOTHER INSTITUTE OF SCIENCE<br>
+                <small>Trilochanpada, Jajpur Town, Near Maa Biraja Temple</small><br>
+                <small>Contact: +91 9439387324</small>
+            </h4>
+            <h5 class="text-center mb-0 mt-2">AGREEMENT / ADMISSION FORM</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">Personal Details :</h5>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.student_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.father_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.mother_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.date_of_birth|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.mobile_number|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.address|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.adhaar_number|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.whatsapp_number|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.blood_group|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.category|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">ADMITTED COLLEGE DETAILS:</h5>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.college_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.board_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.college_roll_no|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.batch|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.eleventh_year|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.twelfth_year|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.course|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">Visitors List :</h5>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor1_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor1_relation|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor1_contact|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor2_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor2_relation|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.visitor2_contact|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">Enrolled For :</h5>
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.enrolled_for|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.sams_login_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.sams_password|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.apaar_id|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">FACILITIES :</h5>
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.hostel_fees|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.academics_accommodation|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">Installments:</h5>
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment1|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment2|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment3|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment4|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment5|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ form.installment6|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h5 class="border-bottom pb-2">Fees Structure:</h5>
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.tms_fees|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.admitted_college_fees|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.college_dress|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.books|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.college_transportation|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.tms_dress|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <p class="text-muted">
+                            <strong>Facilities and standards in the Fee Structure:</strong> 
+                            Hostel accommodation, Medical facilities, Study material, Recreational & Sports facilities.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        {{ form.guardian_signature|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.student_signature|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.tms_signature|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane"></i> Submit Admission Form
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

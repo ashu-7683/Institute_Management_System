@@ -1,0 +1,777 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mother Institute of Science - TMIS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #283593;
+            --accent-color: #3949ab;
+            --light-color: #e8eaf6;
+            --dark-color: #0d47a1;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color) !important;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-img {
+            height: 50px;
+            width: auto;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            padding: 10px 30px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--dark-color);
+            border-color: var(--dark-color);
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-color) 100%);
+            color: white;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') center/cover;
+            opacity: 0.1;
+        }
+        
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+        
+        .footer-logo {
+            height: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 8px 15px !important;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(26, 35, 126, 0.1);
+            color: var(--primary-color) !important;
+        }
+        
+        .institute-name {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #1a237e, #3949ab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        
+        }
+
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-bg: #1e3a8a;
+            --sidebar-hover: #2563eb;
+            --sidebar-active: #3b82f6;
+            --header-height: 70px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        /* Top Navigation Bar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle:hover {
+            background-color: #f3f4f6;
+            transform: rotate(90deg);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-img {
+            height: 45px;
+            width: 45px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(30, 58, 138, 0.3);
+        }
+        
+        .institute-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            line-height: 1.2;
+        }
+        
+        .institute-name small {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #6b7280;
+            letter-spacing: 1px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .welcome-text {
+            color: #4b5563;
+            font-weight: 500;
+        }
+        
+        .welcome-text strong {
+            color: #1e3a8a;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3);
+            color: white;
+        }
+        
+        /* Sidebar - Initially Hidden */
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: var(--header-height);
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--sidebar-bg), #1e40af);
+            color: white;
+            padding-top: 20px;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+            overflow-y: auto;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            display: none;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        .sidebar-header {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        .sidebar-logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .sidebar-logo img {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        .sidebar-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background: var(--sidebar-active);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #fbbf24;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .nav-icon {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-top: var(--header-height);
+            padding: 30px;
+            min-height: calc(100vh - var(--header-height));
+            background: #f8fafc;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Copyright Footer - Only on home page */
+        .copyright-footer {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+            font-size: 0.9rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 30px;
+            background: white;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .developed-by {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+        
+        .developed-by strong {
+            color: #3b82f6;
+        }
+        
+        /* Messages */
+        .alert-container {
+            position: fixed;
+            top: calc(var(--header-height) + 20px);
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+        
+        .alert {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: none;
+            border-radius: 8px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .top-navbar {
+                padding: 0 15px;
+            }
+            
+            .institute-name {
+                font-size: 1.1rem;
+            }
+            
+            .institute-name small {
+                font-size: 0.7rem;
+            }
+            
+            .user-menu {
+                gap: 10px;
+            }
+            
+            .welcome-text {
+                font-size: 0.9rem;
+            }
+            
+            .logout-btn {
+                padding: 6px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .content-card {
+                padding: 20px;
+            }
+            
+            .alert-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .top-navbar {
+                flex-direction: column;
+                height: auto;
+                padding: 10px 15px;
+                gap: 10px;
+            }
+            
+            .left-section {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .user-menu {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .main-content {
+                margin-top: 120px;
+            }
+            
+            .alert-container {
+                top: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="left-section">
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="logo-container">
+                <img src="./../../media/logo/tmis_logo.jpeg" 
+                        alt="TMIS Logo" 
+                        class="logo-img">
+                <div>
+                    <div class="institute-name">THE MOTHER INSTITUTE OF SCIENCE</div>
+                    <small class="text-muted">Excellence in Science Education</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-menu">
+            {% if user.is_authenticated %}
+                <div class="welcome-text">
+                    Welcome, <strong>{{ user.username }}</strong>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            {% else %}
+                <div class="welcome-text">
+                    Welcome to TMIS Portal
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="./../../media/logo/tmis_logo.jpeg" 
+                        alt="TMIS Logo" 
+                        class="logo-img">
+            </div>
+            <div class="sidebar-title">TMIS Portal</div>
+            <div class="sidebar-subtitle">Navigation Menu</div>
+        </div>
+        
+        <ul class="nav-menu">
+            <!-- Home - FIXED: Only active when exactly on home page -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/' %}active{% endif %}" 
+                    href="{% url 'home' %}">
+                    <i class="nav-icon fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            
+            <!-- Admission (Always visible) -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'admission' in request.path %}active{% endif %}" 
+                    href="{% url 'admission_form' %}">
+                    <i class="nav-icon fas fa-file-alt"></i>
+                    <span>Admission Form</span>
+                </a>
+            </li>
+            
+            {% if user.is_authenticated %}
+                <!-- Admin Dashboard (Only for admin users) -->
+                {% if user.user_type == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link {% if 'dashboard' in request.path %}active{% endif %}" 
+                        href="{% url 'admin_dashboard' %}">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <!-- Manage Users (Only for admin users) -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'manage' in request.path %}active{% endif %}" 
+                        href="{% url 'manage_users' %}">
+                        <i class="nav-icon fas fa-users-cog"></i>
+                        <span>Manage Users</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <!-- Additional menu items for logged-in users -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'profile' in request.path %}active{% endif %}" 
+                        href="#">
+                        <i class="nav-icon fas fa-user-circle"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
+            {% else %}
+                <!-- For non-logged in users -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'login' in request.path %}active{% endif %}" 
+                        href="{% url 'login' %}">
+                        <i class="nav-icon fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if 'register' in request.path %}active{% endif %}" 
+                        href="{% url 'register' %}">
+                        <i class="nav-icon fas fa-user-plus"></i>
+                        <span>Register</span>
+                    </a>
+                </li>
+            {% endif %}
+            
+            <!-- Additional Links -->
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-info-circle"></i>
+                    <span>About TMIS</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-graduation-cap"></i>
+                    <span>Courses</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="nav-icon fas fa-phone-alt"></i>
+                    <span>Contact</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Main Content -->
+        {% block content %}{% endblock %}
+        
+        <!-- Copyright block - Show on all pages except those that override it -->
+        {% block copyright %}
+        {% if request.path != '/' %}
+        <div class="copyright-footer">
+            &copy; 2024 The Mother Institute of Science - TMIS. All rights reserved.
+            <div class="developed-by">
+                Software Developed by <strong>MIRO SOFTWARE</strong>
+            </div>
+        </div>
+        {% endif %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer - Only show on home page -->
+    {% if request.path == '/' %}
+    <footer class="footer">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center mb-4">
+                    <img src="./../../media/logo/tmis_logo.jpeg" 
+                        alt="TMIS Logo" 
+                        class="logo-img" style="margin: 0 auto;">
+                    <h5>THE MOTHER INSTITUTE OF SCIENCE</h5>
+                    <p class="mb-0">- TMIS -</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Contact Information</h5>
+                    <p><i class="fas fa-map-marker-alt"></i> Trilochanpada, Jajpur Town, Near Maa Biraja Temple</p>
+                    <p><i class="fas fa-phone"></i> +91 9439387324</p>
+                    <p><i class="fas fa-envelope"></i> contact@motherinstitute.edu</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-light"><i class="fas fa-arrow-right"></i> Home</a></li>
+                        <li><a href="{% url 'admission_form' %}" class="text-light"><i class="fas fa-arrow-right"></i> Admission Form</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'logout' %}" class="text-light"><i class="fas fa-arrow-right"></i> Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'login' %}" class="text-light"><i class="fas fa-arrow-right"></i> Login</a></li>
+                            <li><a href="{% url 'register' %}" class="text-light"><i class="fas fa-arrow-right"></i> Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-light">
+            
+            <!-- Copyright Block -->
+            <div class="text-center">
+                <p>&copy; 2024 The Mother Institute of Science - TMIS. All rights reserved.</p>
+                <p class="small mt-2">Software Developed by <strong>MIRO SOFTWARE</strong></p>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+    // Sidebar toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        // Toggle sidebar
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+            sidebarOverlay.classList.toggle('show');
+        });
+        
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                }
+            }
+        });
+        
+        // FIXED: Improved active link detection
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href) {
+                // Get the clean URL path
+                const hrefPath = href.replace(/^\//, '');
+                const currentPathClean = currentPath.replace(/^\//, '');
+                
+                // Check if current path starts with href path (for nested pages)
+                if (currentPathClean === hrefPath || 
+                    (hrefPath && currentPathClean.startsWith(hrefPath) && hrefPath !== '')) {
+                    // Remove active class from all links first
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to current link
+                    link.classList.add('active');
+                }
+            }
+        });
+        
+        // Auto-close sidebar on link click for mobile
+        if (window.innerWidth <= 768) {
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                });
+            });
+        }
+    });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

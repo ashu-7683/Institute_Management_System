@@ -1,0 +1,78 @@
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <!-- Hero Section -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-4" style="color: #1e3a8a;">Welcome to The Mother Institute of Science</h1>
+        <p class="lead mb-4">Excellence in Science Education Since 2005</p>
+        <a href="{% url 'admission_form' %}" class="btn btn-primary btn-lg">Apply for Admission</a>
+    </div>
+
+    <!-- Features -->
+    <h2 class="text-center mb-5">Our Facilities</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4 border-0 shadow-sm">
+                <i class="fas fa-flask fa-3x text-primary mb-3"></i>
+                <h4>Modern Labs</h4>
+                <p>State-of-the-art laboratories for Physics, Chemistry, and Biology</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4 border-0 shadow-sm">
+                <i class="fas fa-book fa-3x text-primary mb-3"></i>
+                <h4>Expert Faculty</h4>
+                <p>Experienced and dedicated teaching staff</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4 border-0 shadow-sm">
+                <i class="fas fa-home fa-3x text-primary mb-3"></i>
+                <h4>Hostel Facilities</h4>
+                <p>Safe and comfortable accommodation for students</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content-card">
+    <!-- Courses -->
+    <h2 class="text-center mb-5">Our Programs</h2>
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">11th Class Science</h5>
+                    <p class="card-text">Comprehensive coaching for 11th standard</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">12th Class Science</h5>
+                    <p class="card-text">Complete preparation for 12th board exams</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">NEET/JEE</h5>
+                    <p class="card-text">Competitive exam preparation</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Summer Program</h5>
+                    <p class="card-text">Special courses during summer vacation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
