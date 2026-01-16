@@ -1,3 +1,5 @@
+# models.py - UPDATE THE Admission MODEL
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -18,7 +20,10 @@ class CustomUser(AbstractUser):
         return f"{self.username} - {self.user_type}"
 
 class Admission(models.Model):
-    # Student Image Field - ADD THIS
+    # Custom Admission ID Field - ADD THIS
+    admission_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Admission ID")
+    
+    # Student Image Field
     student_image = models.ImageField(upload_to='student_images/', blank=True, null=True, verbose_name="Student Photo")
     
     student_name = models.CharField(max_length=100)
@@ -84,5 +89,25 @@ class Admission(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     submitted_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     
+    def save(self, *args, **kwargs):
+        # Generate custom admission ID if not already set
+        if not self.admission_id:
+            # Get the last admission to determine next number
+            last_admission = Admission.objects.order_by('-id').first()
+            if last_admission and last_admission.admission_id:
+                try:
+                    # Extract number from existing ID
+                    last_number = int(last_admission.admission_id[4:])  # Extract after "TMIS"
+                    next_number = last_number + 1
+                except:
+                    next_number = 1
+            else:
+                next_number = 1
+            
+            # Format: TMIS0001, TMIS0002, etc.
+            self.admission_id = f"TMIS{next_number:04d}"
+        
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return f"{self.student_name} - {self.enrolled_for}"
+        return f"{self.admission_id} - {self.student_name} - {self.enrolled_for}"

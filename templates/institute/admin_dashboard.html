@@ -109,97 +109,101 @@
         <div class="card-body">
             {% if admissions %}
             <div class="table-responsive">
-                <table class="table table-hover" id="admissionsTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th>ID</th>
-                            <th>Student Photo</th>
-                            <th>Student Name</th>
-                            <th>Father's Name</th>
-                            <th>Mobile</th>
-                            <th>Course</th>
-                            <th>Applied Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for admission in admissions %}
-                        <tr>
-                            <td>{{ admission.id }}</td>
-                            <td>
-                                {% if admission.student_image %}
-                                <img src="{{ admission.student_image.url }}" 
-                                        alt="{{ admission.student_name }}" 
-                                        class="student-photo-thumb"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#studentDetailsModal"
-                                        data-id="{{ admission.id }}"
-                                        style="cursor: pointer;">
-                                {% else %}
-                                <div class="no-photo-thumb" style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-user text-muted"></i>
-                                </div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <strong>{{ admission.student_name }}</strong>
-                                {% if admission.adhaar_number %}
-                                <br><small class="text-muted">Aadhaar: {{ admission.adhaar_number }}</small>
-                                {% endif %}
-                            </td>
-                            <td>{{ admission.father_name }}</td>
-                            <td>
-                                {{ admission.mobile_number }}
-                                {% if admission.whatsapp_number %}
-                                <br><small class="text-muted">WhatsApp: {{ admission.whatsapp_number }}</small>
-                                {% endif %}
-                            </td>
-                            <td>{{ admission.course }}</td>
-                            <td>{{ admission.created_at|date:"d/m/Y" }}</td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-outline-primary view-details-btn" 
+                    <table class="table table-hover" id="admissionsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Admission ID</th>
+                                <th>Student Photo</th>
+                                <th>Student Name</th>
+                                <th>Father's Name</th>
+                                <th>Mobile</th>
+                                <th>Course</th>
+                                <th>Applied Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for admission in admissions %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-primary">{{ admission.admission_id }}</span>
+                                    <br><small class="text-muted">ID: {{ admission.id }}</small>
+                                </td>
+                                <td>
+                                    {% if admission.student_image %}
+                                    <img src="{{ admission.student_image.url }}" 
+                                            alt="{{ admission.student_name }}" 
+                                            class="student-photo-thumb"
                                             data-bs-toggle="modal" 
                                             data-bs-target="#studentDetailsModal"
                                             data-id="{{ admission.id }}"
-                                            data-name="{{ admission.student_name }}"
-                                            data-father="{{ admission.father_name }}"
-                                            data-mother="{{ admission.mother_name }}"
-                                            data-dob="{{ admission.date_of_birth|date:'d/m/Y' }}"
-                                            data-mobile="{{ admission.mobile_number }}"
-                                            data-whatsapp="{{ admission.whatsapp_number }}"
-                                            data-aadhaar="{{ admission.adhaar_number }}"
-                                            data-address="{{ admission.address }}"
-                                            data-blood="{{ admission.blood_group }}"
-                                            data-category="{{ admission.category }}"
-                                            data-course="{{ admission.course }}"
-                                            data-college="{{ admission.college_name }}"
-                                            data-board="{{ admission.board_name }}"
-                                            data-roll="{{ admission.college_roll_no }}"
-                                            data-batch="{{ admission.batch }}"
-                                            data-eleventh="{{ admission.eleventh_year }}"
-                                            data-twelfth="{{ admission.twelfth_year }}"
-                                            data-enrolled="{{ admission.enrolled_for }}"
-                                            data-samsid="{{ admission.sams_login_id }}"
-                                            data-samspass="{{ admission.sams_password }}"
-                                            data-hostel="{{ admission.hostel_fees }}"
-                                            data-tms="{{ admission.tms_fees }}"
-                                            data-collegefees="{{ admission.admitted_college_fees }}"
-                                            data-transport="{{ admission.college_transportation }}"
-                                            data-date="{{ admission.created_at|date:'d/m/Y' }}"
-                                            data-image="{% if admission.student_image %}{{ admission.student_image.url }}{% endif %}">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <a href="{% url 'search_admission' %}?search={{ admission.student_name }}" 
-                                        class="btn btn-outline-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                            style="cursor: pointer;">
+                                    {% else %}
+                                    <div class="no-photo-thumb" style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-user text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ admission.student_name }}</strong>
+                                    {% if admission.adhaar_number %}
+                                    <br><small class="text-muted">Aadhaar: {{ admission.adhaar_number }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ admission.father_name }}</td>
+                                <td>
+                                    {{ admission.mobile_number }}
+                                    {% if admission.whatsapp_number %}
+                                    <br><small class="text-muted">WhatsApp: {{ admission.whatsapp_number }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>{{ admission.course }}</td>
+                                <td>{{ admission.created_at|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary view-details-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#studentDetailsModal"
+                                                data-id="{{ admission.id }}"
+                                                data-admission-id="{{ admission.admission_id }}"
+                                                data-name="{{ admission.student_name }}"
+                                                data-father="{{ admission.father_name }}"
+                                                data-mother="{{ admission.mother_name }}"
+                                                data-dob="{{ admission.date_of_birth|date:'d/m/Y' }}"
+                                                data-mobile="{{ admission.mobile_number }}"
+                                                data-whatsapp="{{ admission.whatsapp_number }}"
+                                                data-aadhaar="{{ admission.adhaar_number }}"
+                                                data-address="{{ admission.address }}"
+                                                data-blood="{{ admission.blood_group }}"
+                                                data-category="{{ admission.category }}"
+                                                data-course="{{ admission.course }}"
+                                                data-college="{{ admission.college_name }}"
+                                                data-board="{{ admission.board_name }}"
+                                                data-roll="{{ admission.college_roll_no }}"
+                                                data-batch="{{ admission.batch }}"
+                                                data-eleventh="{{ admission.eleventh_year }}"
+                                                data-twelfth="{{ admission.twelfth_year }}"
+                                                data-enrolled="{{ admission.enrolled_for }}"
+                                                data-samsid="{{ admission.sams_login_id }}"
+                                                data-samspass="{{ admission.sams_password }}"
+                                                data-hostel="{{ admission.hostel_fees }}"
+                                                data-tms="{{ admission.tms_fees }}"
+                                                data-collegefees="{{ admission.admitted_college_fees }}"
+                                                data-transport="{{ admission.college_transportation }}"
+                                                data-date="{{ admission.created_at|date:'d/m/Y' }}"
+                                                data-image="{% if admission.student_image %}{{ admission.student_image.url }}{% endif %}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{% url 'search_admission' %}?search={{ admission.admission_id }}" 
+                                            class="btn btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
             </div>
             
             <!-- Pagination -->
@@ -546,7 +550,7 @@
         
         // Function to populate modal
         function populateModal(button) {
-            const admissionId = button.getAttribute('data-id');
+            const admissionId = button.getAttribute('data-admission-id');
             const studentName = button.getAttribute('data-name');
             const fatherName = button.getAttribute('data-father');
             const motherName = button.getAttribute('data-mother');
@@ -575,7 +579,7 @@
             const imageUrl = button.getAttribute('data-image');
             
             // Populate modal fields
-            document.getElementById('detail-id').textContent = admissionId;
+            document.getElementById('detail-admission-id').textContent = admissionId || '-';
             document.getElementById('detail-name').textContent = studentName || '-';
             document.getElementById('detail-father').textContent = fatherName || '-';
             document.getElementById('detail-mother').textContent = motherName || '-';

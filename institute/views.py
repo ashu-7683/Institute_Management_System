@@ -1,3 +1,5 @@
+# views.py - UPDATE THE search_admission VIEW AND ADD HELPER FUNCTIONS
+
 from django.shortcuts import render, redirect, get_object_or_404 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -9,6 +11,7 @@ from .forms import UserRegistrationForm, AdmissionForm, UserLoginForm
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import json
+import re
 
 def home(request):
     return render(request, 'institute/index.html')
@@ -64,7 +67,8 @@ def admin_dashboard(request):
             Q(father_name__icontains=search_query) |
             Q(mobile_number__icontains=search_query) |
             Q(adhaar_number__icontains=search_query) |
-            Q(college_roll_no__icontains=search_query)
+            Q(college_roll_no__icontains=search_query) |
+            Q(admission_id__icontains=search_query)  # ADD THIS LINE
         )
     
     # Pagination
@@ -145,7 +149,7 @@ def admission_form(request):
             if request.user.is_authenticated:
                 admission.submitted_by = request.user
             admission.save()
-            messages.success(request, 'Admission form submitted successfully!')
+            messages.success(request, f'Admission form submitted successfully! Admission ID: {admission.admission_id}')
             return redirect('admission_form')
     else:
         form = AdmissionForm()
@@ -160,16 +164,29 @@ def search_admission(request):
     search_query = request.GET.get('search', '')
     admission = None
     search_performed = False
+    search_type = 'general'  # 'general', 'mobile', or 'admission_id'
     
+    # Check if search is mobile number (digits only)
     if search_query:
         search_performed = True
-        # Search by student name, mobile, or admission ID
-        admissions = Admission.objects.filter(
-            Q(student_name__icontains=search_query) |
-            Q(mobile_number__icontains=search_query) |
-            Q(father_name__icontains=search_query) |
-            Q(adhaar_number__icontains=search_query)
-        )
+        
+        # Check if search is mobile number (10 digits)
+        if search_query.isdigit() and len(search_query) == 10:
+            search_type = 'mobile'
+            admissions = Admission.objects.filter(mobile_number__icontains=search_query)
+        # Check if search is admission ID (TMIS followed by numbers)
+        elif search_query.upper().startswith('TMIS'):
+            search_type = 'admission_id'
+            admissions = Admission.objects.filter(admission_id__iexact=search_query.upper())
+        else:
+            # General search
+            admissions = Admission.objects.filter(
+                Q(student_name__icontains=search_query) |
+                Q(father_name__icontains=search_query) |
+                Q(mobile_number__icontains=search_query) |
+                Q(adhaar_number__icontains=search_query) |
+                Q(admission_id__icontains=search_query.upper())
+            )
         
         if admissions.exists():
             # If multiple results, show first one
@@ -177,35 +194,221 @@ def search_admission(request):
         else:
             messages.warning(request, f"No admission found for: {search_query}")
     
+    # Get recent admissions for the table
+    recent_admissions = Admission.objects.all().order_by('-created_at')[:10]
+    
+    # Handle POST request (both create and update)
     if request.method == 'POST':
-        # Handle form update
         admission_id = request.POST.get('admission_id')
+        
         if admission_id:
-            admission = get_object_or_404(Admission, id=admission_id)
-            form = AdmissionForm(request.POST, instance=admission)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Admission updated successfully!')
+            # UPDATE EXISTING ADMISSION
+            try:
+                admission = get_object_or_404(Admission, id=admission_id)
+                
+                # Update all fields from request.POST
+                admission.student_name = request.POST.get('student_name', '')
+                admission.father_name = request.POST.get('father_name', '')
+                admission.mother_name = request.POST.get('mother_name', '')
+                
+                # Handle date of birth
+                dob = request.POST.get('date_of_birth')
+                if dob:
+                    admission.date_of_birth = dob
+                
+                admission.mobile_number = request.POST.get('mobile_number', '')
+                admission.address = request.POST.get('address', '')
+                admission.adhaar_number = request.POST.get('adhaar_number', '')
+                admission.whatsapp_number = request.POST.get('whatsapp_number', '')
+                admission.blood_group = request.POST.get('blood_group', '')
+                admission.category = request.POST.get('category', '')
+                
+                # College details
+                admission.college_name = request.POST.get('college_name', '')
+                admission.board_name = request.POST.get('board_name', '')
+                admission.college_roll_no = request.POST.get('college_roll_no', '')
+                admission.batch = request.POST.get('batch', '')
+                admission.eleventh_year = request.POST.get('eleventh_year', '')
+                admission.twelfth_year = request.POST.get('twelfth_year', '')
+                admission.course = request.POST.get('course', '')
+                
+                # Visitors
+                admission.visitor1_name = request.POST.get('visitor1_name', '')
+                admission.visitor1_relation = request.POST.get('visitor1_relation', '')
+                admission.visitor1_contact = request.POST.get('visitor1_contact', '')
+                admission.visitor2_name = request.POST.get('visitor2_name', '')
+                admission.visitor2_relation = request.POST.get('visitor2_relation', '')
+                admission.visitor2_contact = request.POST.get('visitor2_contact', '')
+                
+                # Enrollment
+                admission.enrolled_for = request.POST.get('enrolled_for', '')
+                admission.sams_login_id = request.POST.get('sams_login_id', '')
+                admission.sams_password = request.POST.get('sams_password', '')
+                admission.apaar_id = request.POST.get('apaar_id', '')
+                
+                # Facilities
+                hostel_fees = request.POST.get('hostel_fees', '0')
+                admission.hostel_fees = float(hostel_fees) if hostel_fees else 0.0
+                
+                admission.academics_accommodation = request.POST.get('academics_accommodation', '')
+                
+                # Installments
+                installment1 = request.POST.get('installment1', '0')
+                installment2 = request.POST.get('installment2', '0')
+                installment3 = request.POST.get('installment3', '0')
+                installment4 = request.POST.get('installment4', '0')
+                installment5 = request.POST.get('installment5', '0')
+                installment6 = request.POST.get('installment6', '0')
+                
+                admission.installment1 = float(installment1) if installment1 else 0.0
+                admission.installment2 = float(installment2) if installment2 else 0.0
+                admission.installment3 = float(installment3) if installment3 else 0.0
+                admission.installment4 = float(installment4) if installment4 else 0.0
+                admission.installment5 = float(installment5) if installment5 else 0.0
+                admission.installment6 = float(installment6) if installment6 else 0.0
+                
+                # Fees structure
+                tms_fees = request.POST.get('tms_fees', '0')
+                college_fees = request.POST.get('admitted_college_fees', '0')
+                
+                admission.tms_fees = float(tms_fees) if tms_fees else 0.0
+                admission.admitted_college_fees = float(college_fees) if college_fees else 0.0
+                admission.college_dress = request.POST.get('college_dress', '')
+                admission.books = request.POST.get('books', '')
+                admission.college_transportation = request.POST.get('college_transportation', '')
+                admission.tms_dress = request.POST.get('tms_dress', '')
+                
+                # Signatures
+                admission.guardian_signature = request.POST.get('guardian_signature', '')
+                admission.student_signature = request.POST.get('student_signature', '')
+                admission.tms_signature = request.POST.get('tms_signature', '')
+                
+                # Handle image upload
+                if 'student_image' in request.FILES:
+                    admission.student_image = request.FILES['student_image']
+                
+                admission.submitted_by = request.user
+                admission.save()
+                
+                messages.success(request, f'Admission {admission.admission_id} for {admission.student_name} updated successfully!')
                 return redirect('search_admission')
+                
+            except Exception as e:
+                messages.error(request, f'Error updating admission: {str(e)}')
+                # For debugging, you can print the error
+                print(f"Update error: {e}")
         else:
-            # Create new admission
-            form = AdmissionForm(request.POST)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'New admission created successfully!')
+            # CREATE NEW ADMISSION
+            try:
+                admission = Admission()
+                
+                # Set all fields from request.POST
+                admission.student_name = request.POST.get('student_name', '')
+                admission.father_name = request.POST.get('father_name', '')
+                admission.mother_name = request.POST.get('mother_name', '')
+                
+                # Handle date of birth
+                dob = request.POST.get('date_of_birth')
+                if dob:
+                    admission.date_of_birth = dob
+                
+                admission.mobile_number = request.POST.get('mobile_number', '')
+                admission.address = request.POST.get('address', '')
+                admission.adhaar_number = request.POST.get('adhaar_number', '')
+                admission.whatsapp_number = request.POST.get('whatsapp_number', '')
+                admission.blood_group = request.POST.get('blood_group', '')
+                admission.category = request.POST.get('category', '')
+                
+                # College details
+                admission.college_name = request.POST.get('college_name', '')
+                admission.board_name = request.POST.get('board_name', '')
+                admission.college_roll_no = request.POST.get('college_roll_no', '')
+                admission.batch = request.POST.get('batch', '')
+                admission.eleventh_year = request.POST.get('eleventh_year', '')
+                admission.twelfth_year = request.POST.get('twelfth_year', '')
+                admission.course = request.POST.get('course', '')
+                
+                # Visitors
+                admission.visitor1_name = request.POST.get('visitor1_name', '')
+                admission.visitor1_relation = request.POST.get('visitor1_relation', '')
+                admission.visitor1_contact = request.POST.get('visitor1_contact', '')
+                admission.visitor2_name = request.POST.get('visitor2_name', '')
+                admission.visitor2_relation = request.POST.get('visitor2_relation', '')
+                admission.visitor2_contact = request.POST.get('visitor2_contact', '')
+                
+                # Enrollment
+                admission.enrolled_for = request.POST.get('enrolled_for', '')
+                admission.sams_login_id = request.POST.get('sams_login_id', '')
+                admission.sams_password = request.POST.get('sams_password', '')
+                admission.apaar_id = request.POST.get('apaar_id', '')
+                
+                # Facilities
+                hostel_fees = request.POST.get('hostel_fees', '0')
+                admission.hostel_fees = float(hostel_fees) if hostel_fees else 0.0
+                
+                admission.academics_accommodation = request.POST.get('academics_accommodation', '')
+                
+                # Installments
+                installment1 = request.POST.get('installment1', '0')
+                installment2 = request.POST.get('installment2', '0')
+                installment3 = request.POST.get('installment3', '0')
+                installment4 = request.POST.get('installment4', '0')
+                installment5 = request.POST.get('installment5', '0')
+                installment6 = request.POST.get('installment6', '0')
+                
+                admission.installment1 = float(installment1) if installment1 else 0.0
+                admission.installment2 = float(installment2) if installment2 else 0.0
+                admission.installment3 = float(installment3) if installment3 else 0.0
+                admission.installment4 = float(installment4) if installment4 else 0.0
+                admission.installment5 = float(installment5) if installment5 else 0.0
+                admission.installment6 = float(installment6) if installment6 else 0.0
+                
+                # Fees structure
+                tms_fees = request.POST.get('tms_fees', '0')
+                college_fees = request.POST.get('admitted_college_fees', '0')
+                
+                admission.tms_fees = float(tms_fees) if tms_fees else 0.0
+                admission.admitted_college_fees = float(college_fees) if college_fees else 0.0
+                admission.college_dress = request.POST.get('college_dress', '')
+                admission.books = request.POST.get('books', '')
+                admission.college_transportation = request.POST.get('college_transportation', '')
+                admission.tms_dress = request.POST.get('tms_dress', '')
+                
+                # Signatures
+                admission.guardian_signature = request.POST.get('guardian_signature', '')
+                admission.student_signature = request.POST.get('student_signature', '')
+                admission.tms_signature = request.POST.get('tms_signature', '')
+                
+                # Handle image upload
+                if 'student_image' in request.FILES:
+                    admission.student_image = request.FILES['student_image']
+                
+                admission.submitted_by = request.user
+                admission.save()
+                
+                messages.success(request, f'New admission created successfully! Admission ID: {admission.admission_id}')
                 return redirect('search_admission')
+                
+            except Exception as e:
+                messages.error(request, f'Error creating admission: {str(e)}')
+                # For debugging, you can print the error
+                print(f"Create error: {e}")
+    
+    # For GET requests, prepare the form
+    if admission:
+        # If we found an admission from search, pre-fill the form
+        form = AdmissionForm(instance=admission)
     else:
-        # If we have an admission from search, pre-fill the form
-        if admission:
-            form = AdmissionForm(instance=admission)
-        else:
-            form = AdmissionForm()
+        # Otherwise, show empty form
+        form = AdmissionForm()
     
     context = {
         'form': form,
         'admission': admission,
         'search_query': search_query,
         'search_performed': search_performed,
+        'recent_admissions': recent_admissions,
+        'search_type': search_type,
     }
     return render(request, 'institute/search_admission.html', context)
 
