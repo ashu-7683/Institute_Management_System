@@ -608,13 +608,13 @@
                     </a>
                 </li>
                 
-                <li class="nav-item">
+                {% comment %} <li class="nav-item">
                     <a class="nav-link {% if 'register' in request.path %}active{% endif %}" 
                         href="{% url 'register' %}">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <span>Register</span>
                     </a>
-                </li>
+                </li> {% endcomment %}
             {% endif %}
             
             <!-- Additional Links -->

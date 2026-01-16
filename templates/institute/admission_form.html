@@ -13,13 +13,56 @@
             <h5 class="text-center mb-0 mt-2">AGREEMENT / ADMISSION FORM</h5>
         </div>
         <div class="card-body">
-            <form method="POST">
+            <!-- ADD enctype="multipart/form-data" to the form -->
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <h5 class="border-bottom pb-2">Personal Details :</h5>
                     </div>
+                    
+                    <!-- Student Photo Section - ADD THIS -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Student Photo</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                {% if form.instance.student_image %}
+                                    <img src="{{ form.instance.student_image.url }}" 
+                                        alt="Student Photo" 
+                                        class="img-thumbnail mb-3" 
+                                        style="max-width: 200px; max-height: 250px;">
+                                {% else %}
+                                    <div class="mb-3 p-4 border rounded bg-light">
+                                        <i class="fas fa-user-circle fa-5x text-muted"></i>
+                                        <p class="mt-2 text-muted">No photo uploaded</p>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="form-group">
+                                    <label for="id_student_image" class="form-label">Upload Student Photo</label>
+                                    <input type="file" 
+                                            class="form-control" 
+                                            name="student_image" 
+                                            id="id_student_image"
+                                            accept="image/*">
+                                    <small class="form-text text-muted">
+                                        Supported formats: JPG, PNG, JPEG. Max size: 5MB
+                                    </small>
+                                </div>
+                                
+                                <!-- Preview Image -->
+                                <div id="imagePreview" class="mt-3" style="display: none;">
+                                    <h6>Preview:</h6>
+                                    <img id="previewImg" class="img-thumbnail" style="max-width: 150px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rest of the personal details -->
                     <div class="col-md-4">
                         {{ form.student_name|as_crispy_field }}
                     </div>
@@ -211,5 +254,119 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<!-- Add JavaScript for image preview -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.getElementById('id_student_image');
+    const previewContainer = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPG, PNG, JPEG, GIF)');
+                    this.value = '';
+                    previewContainer.style.display = 'none';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+    }
+    
+    // Form validation for file size
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const imageInput = document.getElementById('id_student_image');
+        
+        if (imageInput && imageInput.files.length > 0) {
+            const file = imageInput.files[0];
+            
+            // Check file size
+            if (file.size > 5 * 1024 * 1024) {
+                e.preventDefault();
+                alert('Image file size must be less than 5MB');
+                imageInput.focus();
+                return false;
+            }
+            
+            // Check file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                e.preventDefault();
+                alert('Please upload a valid image file (JPG, PNG, JPEG, GIF)');
+                imageInput.focus();
+                return false;
+            }
+        }
+        
+        return true;
+    });
+});
+</script>
+
+<style>
+/* Additional styles for the image upload section */
+.img-thumbnail {
+    border: 2px dashed #dee2e6;
+    padding: 5px;
+    background-color: #f8f9fa;
+}
+
+.card-header.bg-light {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6;
+}
+
+#previewImg {
+    max-height: 200px;
+    object-fit: cover;
+}
+
+/* Make sure the form handles file inputs properly */
+.form-control[type="file"] {
+    padding: 0.375rem 0.75rem;
+    line-height: 1.5;
+}
+
+.form-control[type="file"]::-webkit-file-upload-button {
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    padding: 0.375rem 0.75rem;
+    margin-right: 0.75rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+}
+
+.form-control[type="file"]::-webkit-file-upload-button:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+</style>
+{% endblock %}

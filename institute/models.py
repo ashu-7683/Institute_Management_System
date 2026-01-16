@@ -18,6 +18,9 @@ class CustomUser(AbstractUser):
         return f"{self.username} - {self.user_type}"
 
 class Admission(models.Model):
+    # Student Image Field - ADD THIS
+    student_image = models.ImageField(upload_to='student_images/', blank=True, null=True, verbose_name="Student Photo")
+    
     student_name = models.CharField(max_length=100)
     father_name = models.CharField(max_length=100)
     mother_name = models.CharField(max_length=100)
@@ -83,6 +86,3 @@ class Admission(models.Model):
     
     def __str__(self):
         return f"{self.student_name} - {self.enrolled_for}"
-    
-    # class Meta:
-    #     ordering = ['-created_at']

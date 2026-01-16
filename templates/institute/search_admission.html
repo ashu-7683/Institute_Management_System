@@ -27,10 +27,10 @@
                             <i class="fas fa-user-graduate"></i>
                         </span>
                         <input type="text" 
-                               class="form-control" 
-                               name="search" 
-                               placeholder="Search by Student Name, Mobile Number, Father's Name, or Aadhaar Number"
-                               value="{{ search_query }}">
+                                class="form-control" 
+                                name="search" 
+                                placeholder="Search by Student Name, Mobile Number, Father's Name, or Aadhaar Number"
+                                value="{{ search_query|default:'' }}">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -90,10 +90,10 @@
                         <div class="mb-3">
                             <label class="form-label">Student Name *</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="student_name" 
-                                   value="{{ form.student_name.value|default:'' }}"
-                                   required>
+                                    class="form-control" 
+                                    name="student_name" 
+                                    value="{% if admission %}{{ admission.student_name }}{% elif form.student_name.value %}{{ form.student_name.value }}{% endif %}"
+                                    required>
                         </div>
                     </div>
                     
@@ -101,10 +101,10 @@
                         <div class="mb-3">
                             <label class="form-label">Father's Name *</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="father_name" 
-                                   value="{{ form.father_name.value|default:'' }}"
-                                   required>
+                                    class="form-control" 
+                                    name="father_name" 
+                                    value="{% if admission %}{{ admission.father_name }}{% elif form.father_name.value %}{{ form.father_name.value }}{% endif %}"
+                                    required>
                         </div>
                     </div>
                     
@@ -112,10 +112,10 @@
                         <div class="mb-3">
                             <label class="form-label">Mother's Name *</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="mother_name" 
-                                   value="{{ form.mother_name.value|default:'' }}"
-                                   required>
+                                    class="form-control" 
+                                    name="mother_name" 
+                                    value="{% if admission %}{{ admission.mother_name }}{% elif form.mother_name.value %}{{ form.mother_name.value }}{% endif %}"
+                                    required>
                         </div>
                     </div>
                     
@@ -123,10 +123,10 @@
                         <div class="mb-3">
                             <label class="form-label">Date of Birth *</label>
                             <input type="date" 
-                                   class="form-control" 
-                                   name="date_of_birth" 
-                                   value="{{ form.date_of_birth.value|default:'' }}"
-                                   required>
+                                    class="form-control" 
+                                    name="date_of_birth" 
+                                    value="{% if admission %}{{ admission.date_of_birth|date:'Y-m-d' }}{% elif form.date_of_birth.value %}{{ form.date_of_birth.value }}{% endif %}"
+                                    required>
                         </div>
                     </div>
                     
@@ -134,10 +134,10 @@
                         <div class="mb-3">
                             <label class="form-label">Mobile Number *</label>
                             <input type="tel" 
-                                   class="form-control" 
-                                   name="mobile_number" 
-                                   value="{{ form.mobile_number.value|default:'' }}"
-                                   required>
+                                    class="form-control" 
+                                    name="mobile_number" 
+                                    value="{% if admission %}{{ admission.mobile_number }}{% elif form.mobile_number.value %}{{ form.mobile_number.value }}{% endif %}"
+                                    required>
                         </div>
                     </div>
                     
@@ -145,9 +145,9 @@
                         <div class="mb-3">
                             <label class="form-label">WhatsApp Number</label>
                             <input type="tel" 
-                                   class="form-control" 
-                                   name="whatsapp_number" 
-                                   value="{{ form.whatsapp_number.value|default:'' }}">
+                                    class="form-control" 
+                                    name="whatsapp_number" 
+                                    value="{% if admission %}{{ admission.whatsapp_number }}{% elif form.whatsapp_number.value %}{{ form.whatsapp_number.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -155,9 +155,9 @@
                         <div class="mb-3">
                             <label class="form-label">Aadhaar Number</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="adhaar_number" 
-                                   value="{{ form.adhaar_number.value|default:'' }}">
+                                    class="form-control" 
+                                    name="adhaar_number" 
+                                    value="{% if admission %}{{ admission.adhaar_number }}{% elif form.adhaar_number.value %}{{ form.adhaar_number.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -165,9 +165,9 @@
                         <div class="mb-3">
                             <label class="form-label">Address *</label>
                             <textarea class="form-control" 
-                                      name="address" 
-                                      rows="2" 
-                                      required>{{ form.address.value|default:'' }}</textarea>
+                                        name="address" 
+                                        rows="2" 
+                                        required>{% if admission %}{{ admission.address }}{% elif form.address.value %}{{ form.address.value }}{% endif %}</textarea>
                         </div>
                     </div>
                     
@@ -176,14 +176,14 @@
                             <label class="form-label">Blood Group</label>
                             <select class="form-select" name="blood_group">
                                 <option value="">Select</option>
-                                <option value="A+" {% if form.blood_group.value == 'A+' %}selected{% endif %}>A+</option>
-                                <option value="A-" {% if form.blood_group.value == 'A-' %}selected{% endif %}>A-</option>
-                                <option value="B+" {% if form.blood_group.value == 'B+' %}selected{% endif %}>B+</option>
-                                <option value="B-" {% if form.blood_group.value == 'B-' %}selected{% endif %}>B-</option>
-                                <option value="O+" {% if form.blood_group.value == 'O+' %}selected{% endif %}>O+</option>
-                                <option value="O-" {% if form.blood_group.value == 'O-' %}selected{% endif %}>O-</option>
-                                <option value="AB+" {% if form.blood_group.value == 'AB+' %}selected{% endif %}>AB+</option>
-                                <option value="AB-" {% if form.blood_group.value == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="A+" {% if admission.blood_group == 'A+' or form.blood_group.value == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if admission.blood_group == 'A-' or form.blood_group.value == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if admission.blood_group == 'B+' or form.blood_group.value == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if admission.blood_group == 'B-' or form.blood_group.value == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="O+" {% if admission.blood_group == 'O+' or form.blood_group.value == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if admission.blood_group == 'O-' or form.blood_group.value == 'O-' %}selected{% endif %}>O-</option>
+                                <option value="AB+" {% if admission.blood_group == 'AB+' or form.blood_group.value == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if admission.blood_group == 'AB-' or form.blood_group.value == 'AB-' %}selected{% endif %}>AB-</option>
                             </select>
                         </div>
                     </div>
@@ -193,10 +193,10 @@
                             <label class="form-label">Category</label>
                             <select class="form-select" name="category">
                                 <option value="">Select</option>
-                                <option value="General" {% if form.category.value == 'General' %}selected{% endif %}>General</option>
-                                <option value="OBC" {% if form.category.value == 'OBC' %}selected{% endif %}>OBC</option>
-                                <option value="SC" {% if form.category.value == 'SC' %}selected{% endif %}>SC</option>
-                                <option value="ST" {% if form.category.value == 'ST' %}selected{% endif %}>ST</option>
+                                <option value="General" {% if admission.category == 'General' or form.category.value == 'General' %}selected{% endif %}>General</option>
+                                <option value="OBC" {% if admission.category == 'OBC' or form.category.value == 'OBC' %}selected{% endif %}>OBC</option>
+                                <option value="SC" {% if admission.category == 'SC' or form.category.value == 'SC' %}selected{% endif %}>SC</option>
+                                <option value="ST" {% if admission.category == 'ST' or form.category.value == 'ST' %}selected{% endif %}>ST</option>
                             </select>
                         </div>
                     </div>
@@ -212,9 +212,9 @@
                         <div class="mb-3">
                             <label class="form-label">College Name</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="college_name" 
-                                   value="{{ form.college_name.value|default:'' }}">
+                                    class="form-control" 
+                                    name="college_name" 
+                                    value="{% if admission %}{{ admission.college_name }}{% elif form.college_name.value %}{{ form.college_name.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -222,9 +222,9 @@
                         <div class="mb-3">
                             <label class="form-label">Board Name</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="board_name" 
-                                   value="{{ form.board_name.value|default:'' }}">
+                                    class="form-control" 
+                                    name="board_name" 
+                                    value="{% if admission %}{{ admission.board_name }}{% elif form.board_name.value %}{{ form.board_name.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -232,9 +232,9 @@
                         <div class="mb-3">
                             <label class="form-label">College Roll No</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="college_roll_no" 
-                                   value="{{ form.college_roll_no.value|default:'' }}">
+                                    class="form-control" 
+                                    name="college_roll_no" 
+                                    value="{% if admission %}{{ admission.college_roll_no }}{% elif form.college_roll_no.value %}{{ form.college_roll_no.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -242,9 +242,9 @@
                         <div class="mb-3">
                             <label class="form-label">Batch</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="batch" 
-                                   value="{{ form.batch.value|default:'' }}">
+                                    class="form-control" 
+                                    name="batch" 
+                                    value="{% if admission %}{{ admission.batch }}{% elif form.batch.value %}{{ form.batch.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -252,9 +252,9 @@
                         <div class="mb-3">
                             <label class="form-label">11th Year</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="eleventh_year" 
-                                   value="{{ form.eleventh_year.value|default:'' }}">
+                                    class="form-control" 
+                                    name="eleventh_year" 
+                                    value="{% if admission %}{{ admission.eleventh_year }}{% elif form.eleventh_year.value %}{{ form.eleventh_year.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -262,9 +262,9 @@
                         <div class="mb-3">
                             <label class="form-label">12th Year</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="twelfth_year" 
-                                   value="{{ form.twelfth_year.value|default:'' }}">
+                                    class="form-control" 
+                                    name="twelfth_year" 
+                                    value="{% if admission %}{{ admission.twelfth_year }}{% elif form.twelfth_year.value %}{{ form.twelfth_year.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -273,11 +273,12 @@
                             <label class="form-label">Course</label>
                             <select class="form-select" name="course">
                                 <option value="">Select</option>
-                                <option value="11th Science" {% if form.course.value == '11th Science' %}selected{% endif %}>11th Science</option>
-                                <option value="12th Science" {% if form.course.value == '12th Science' %}selected{% endif %}>12th Science</option>
-                                <option value="NEET" {% if form.course.value == 'NEET' %}selected{% endif %}>NEET</option>
-                                <option value="JEE" {% if form.course.value == 'JEE' %}selected{% endif %}>JEE</option>
-                                <option value="Summer Program" {% if form.course.value == 'Summer Program' %}selected{% endif %}>Summer Program</option>
+                                <option value="11th Science" {% if admission.course == '11th Science' or form.course.value == '11th Science' %}selected{% endif %}>11th Science</option>
+                                <option value="12th Science" {% if admission.course == '12th Science' or form.course.value == '12th Science' %}selected{% endif %}>12th Science</option>
+                                <option value="NEET" {% if admission.course == 'NEET' or form.course.value == 'NEET' %}selected{% endif %}>NEET</option>
+                                <option value="JEE" {% if admission.course == 'JEE' or form.course.value == 'JEE' %}selected{% endif %}>JEE</option>
+                                <option value="Summer Program" {% if admission.course == 'Summer Program' or form.course.value == 'Summer Program' %}selected{% endif %}>Summer Program</option>
+                                <option value="Btech" {% if admission.course == 'Btech' or form.course.value == 'Btech' %}selected{% endif %}>Btech</option>
                             </select>
                         </div>
                     </div>
@@ -294,10 +295,10 @@
                             <label class="form-label">Enrolled For</label>
                             <select class="form-select" name="enrolled_for">
                                 <option value="">Select</option>
-                                <option value="Summer Programme" {% if form.enrolled_for.value == 'Summer Programme' %}selected{% endif %}>Summer Programme</option>
-                                <option value="11th Class Science" {% if form.enrolled_for.value == '11th Class Science' %}selected{% endif %}>11th Class Science</option>
-                                <option value="12th Class Science" {% if form.enrolled_for.value == '12th Class Science' %}selected{% endif %}>12th Class Science</option>
-                                <option value="Repeater (NEET/JEE)" {% if form.enrolled_for.value == 'Repeater (NEET/JEE)' %}selected{% endif %}>Repeater (NEET/JEE)</option>
+                                <option value="Summer Programme" {% if admission.enrolled_for == 'Summer Programme' or form.enrolled_for.value == 'Summer Programme' %}selected{% endif %}>Summer Programme</option>
+                                <option value="11th Class Science" {% if admission.enrolled_for == '11th Class Science' or form.enrolled_for.value == '11th Class Science' %}selected{% endif %}>11th Class Science</option>
+                                <option value="12th Class Science" {% if admission.enrolled_for == '12th Class Science' or form.enrolled_for.value == '12th Class Science' %}selected{% endif %}>12th Class Science</option>
+                                <option value="Repeater (NEET/JEE)" {% if admission.enrolled_for == 'Repeater (NEET/JEE)' or form.enrolled_for.value == 'Repeater (NEET/JEE)' %}selected{% endif %}>Repeater (NEET/JEE)</option>
                             </select>
                         </div>
                     </div>
@@ -306,9 +307,9 @@
                         <div class="mb-3">
                             <label class="form-label">SAMS Login ID</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="sams_login_id" 
-                                   value="{{ form.sams_login_id.value|default:'' }}">
+                                    class="form-control" 
+                                    name="sams_login_id" 
+                                    value="{% if admission %}{{ admission.sams_login_id }}{% elif form.sams_login_id.value %}{{ form.sams_login_id.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -316,9 +317,9 @@
                         <div class="mb-3">
                             <label class="form-label">SAMS Password</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="sams_password" 
-                                   value="{{ form.sams_password.value|default:'' }}">
+                                    class="form-control" 
+                                    name="sams_password" 
+                                    value="{% if admission %}{{ admission.sams_password }}{% elif form.sams_password.value %}{{ form.sams_password.value }}{% endif %}">
                         </div>
                     </div>
                     
@@ -333,10 +334,10 @@
                         <div class="mb-3">
                             <label class="form-label">Hostel Fees (₹)</label>
                             <input type="number" 
-                                   class="form-control" 
-                                   name="hostel_fees" 
-                                   step="0.01"
-                                   value="{{ form.hostel_fees.value|default:0 }}">
+                                    class="form-control" 
+                                    name="hostel_fees" 
+                                    step="0.01"
+                                    value="{% if admission %}{{ admission.hostel_fees }}{% elif form.hostel_fees.value %}{{ form.hostel_fees.value }}{% else %}0{% endif %}">
                         </div>
                     </div>
                     
@@ -344,10 +345,10 @@
                         <div class="mb-3">
                             <label class="form-label">TMS Fees (₹)</label>
                             <input type="number" 
-                                   class="form-control" 
-                                   name="tms_fees" 
-                                   step="0.01"
-                                   value="{{ form.tms_fees.value|default:0 }}">
+                                    class="form-control" 
+                                    name="tms_fees" 
+                                    step="0.01"
+                                    value="{% if admission %}{{ admission.tms_fees }}{% elif form.tms_fees.value %}{{ form.tms_fees.value }}{% else %}0{% endif %}">
                         </div>
                     </div>
                     
@@ -355,10 +356,10 @@
                         <div class="mb-3">
                             <label class="form-label">College Fees (₹)</label>
                             <input type="number" 
-                                   class="form-control" 
-                                   name="admitted_college_fees" 
-                                   step="0.01"
-                                   value="{{ form.admitted_college_fees.value|default:0 }}">
+                                    class="form-control" 
+                                    name="admitted_college_fees" 
+                                    step="0.01"
+                                    value="{% if admission %}{{ admission.admitted_college_fees }}{% elif form.admitted_college_fees.value %}{{ form.admitted_college_fees.value }}{% else %}0{% endif %}">
                         </div>
                     </div>
                     
@@ -366,16 +367,16 @@
                         <div class="mb-3">
                             <label class="form-label">Transportation</label>
                             <input type="text" 
-                                   class="form-control" 
-                                   name="college_transportation" 
-                                   value="{{ form.college_transportation.value|default:'' }}">
+                                    class="form-control" 
+                                    name="college_transportation" 
+                                    value="{% if admission %}{{ admission.college_transportation }}{% elif form.college_transportation.value %}{{ form.college_transportation.value }}{% endif %}">
                         </div>
                     </div>
                     
                     <!-- Submit Buttons -->
                     <div class="col-md-12 mt-4">
                         <div class="d-flex justify-content-between">
-                            <button type="reset" class="btn btn-secondary">
+                            <button type="button" id="resetFormBtn" class="btn btn-secondary">
                                 <i class="fas fa-redo me-1"></i> Reset Form
                             </button>
                             
@@ -421,17 +422,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for admission in Admission.objects.all|slice:"10" %}
+                        {% for recent_admission in recent_admissions %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ admission.student_name }}</td>
-                            <td>{{ admission.mobile_number }}</td>
-                            <td>{{ admission.father_name }}</td>
-                            <td><span class="badge bg-info">{{ admission.course }}</span></td>
-                            <td>{{ admission.created_at|date:"d/m/Y" }}</td>
+                            <td>{{ recent_admission.student_name }}</td>
+                            <td>{{ recent_admission.mobile_number }}</td>
+                            <td>{{ recent_admission.father_name }}</td>
+                            <td><span class="badge bg-info">{{ recent_admission.course }}</span></td>
+                            <td>{{ recent_admission.created_at|date:"d/m/Y" }}</td>
                             <td>
-                                <a href="{% url 'search_admission' %}?search={{ admission.student_name }}" 
-                                   class="btn btn-sm btn-outline-primary">
+                                <a href="{% url 'search_admission' %}?search={{ recent_admission.mobile_number }}" 
+                                    class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                             </td>
@@ -469,22 +470,62 @@
         color: #1e3a8a;
         font-weight: 600;
     }
+    
+    .is-invalid {
+        border-color: #dc3545;
+    }
 </style>
 
 <script>
-    // Auto-fill mobile with WhatsApp if empty
     document.addEventListener('DOMContentLoaded', function() {
         const mobileInput = document.querySelector('input[name="mobile_number"]');
         const whatsappInput = document.querySelector('input[name="whatsapp_number"]');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        const admissionForm = document.getElementById('admissionForm');
         
-        mobileInput.addEventListener('blur', function() {
-            if (this.value && !whatsappInput.value) {
-                whatsappInput.value = this.value;
-            }
-        });
+        // Auto-fill mobile with WhatsApp if empty
+        if (mobileInput) {
+            mobileInput.addEventListener('blur', function() {
+                if (this.value && (!whatsappInput.value || whatsappInput.value === '')) {
+                    whatsappInput.value = this.value;
+                }
+            });
+        }
+        
+        // Reset form functionality
+        if (resetFormBtn) {
+            resetFormBtn.addEventListener('click', function() {
+                // If we're editing an admission, redirect to new admission page
+                {% if admission %}
+                    window.location.href = "{% url 'search_admission' %}";
+                {% else %}
+                    // Clear all form fields
+                    admissionForm.reset();
+                    
+                    // Clear date field specifically (reset doesn't work for date inputs properly)
+                    document.querySelector('input[name="date_of_birth"]').value = '';
+                    
+                    // Reset select fields to first option
+                    document.querySelectorAll('select').forEach(select => {
+                        select.selectedIndex = 0;
+                    });
+                    
+                    // Clear textareas
+                    document.querySelector('textarea[name="address"]').value = '';
+                    
+                    // Focus on first field
+                    document.querySelector('input[name="student_name"]').focus();
+                    
+                    // Remove any validation errors
+                    document.querySelectorAll('.is-invalid').forEach(field => {
+                        field.classList.remove('is-invalid');
+                    });
+                {% endif %}
+            });
+        }
         
         // Form validation
-        document.getElementById('admissionForm').addEventListener('submit', function(e) {
+        admissionForm.addEventListener('submit', function(e) {
             const requiredFields = this.querySelectorAll('[required]');
             let isValid = true;
             
@@ -500,7 +541,20 @@
             if (!isValid) {
                 e.preventDefault();
                 alert('Please fill all required fields marked with *');
+                return false;
             }
+            
+            // Additional validation for mobile number
+            const mobileNumber = document.querySelector('input[name="mobile_number"]').value;
+            if (mobileNumber && !/^\d{10}$/.test(mobileNumber)) {
+                e.preventDefault();
+                alert('Please enter a valid 10-digit mobile number');
+                document.querySelector('input[name="mobile_number"]').classList.add('is-invalid');
+                document.querySelector('input[name="mobile_number"]').focus();
+                return false;
+            }
+            
+            return true;
         });
         
         // Remove invalid class when typing

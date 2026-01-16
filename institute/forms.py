@@ -39,4 +39,5 @@ class AdmissionForm(forms.ModelForm):
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'address': forms.Textarea(attrs={'rows': 3}),
             'academics_accommodation': forms.Textarea(attrs={'rows': 3}),
+            'student_image': forms.FileInput(attrs={'accept': 'image/*'}),
         }
