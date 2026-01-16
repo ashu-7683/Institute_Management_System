@@ -1,5 +1,6 @@
 {% extends 'institute/base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
@@ -14,7 +15,7 @@
         </div>
         <div class="card-body">
             <!-- ADD enctype="multipart/form-data" to the form -->
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="admissionForm">
                 {% csrf_token %}
                 
                 <div class="row mb-4">
@@ -22,76 +23,90 @@
                         <h5 class="border-bottom pb-2">Personal Details :</h5>
                     </div>
                     
-                    <!-- Student Photo Section - ADD THIS -->
-                    <div class="col-md-4 mb-3">
-                        <div class="card">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">Student Photo</h6>
+                    <!-- Compact Student Photo Section -->
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0 text-center">
+                                    <i class="fas fa-camera me-1"></i> Student Photo
+                                </h6>
                             </div>
-                            <div class="card-body text-center">
-                                {% if form.instance.student_image %}
-                                    <img src="{{ form.instance.student_image.url }}" 
-                                        alt="Student Photo" 
-                                        class="img-thumbnail mb-3" 
-                                        style="max-width: 200px; max-height: 250px;">
-                                {% else %}
-                                    <div class="mb-3 p-4 border rounded bg-light">
-                                        <i class="fas fa-user-circle fa-5x text-muted"></i>
-                                        <p class="mt-2 text-muted">No photo uploaded</p>
-                                    </div>
-                                {% endif %}
+                            <div class="card-body p-3 text-center">
+                                <!-- Current/Preview Image Display -->
+                                <div id="imageDisplayContainer" class="mb-2">
+                                    {% if form.instance.student_image %}
+                                        <img src="{{ form.instance.student_image.url }}" 
+                                                alt="Student Photo" 
+                                                class="img-fluid rounded" 
+                                                style="max-height: 150px; object-fit: cover; cursor: pointer;"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#imagePreviewModal">
+                                    {% else %}
+                                        <div class="border rounded p-3 bg-light" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                            <div>
+                                                <i class="fas fa-user-circle fa-3x text-muted"></i>
+                                                <p class="mt-2 small text-muted mb-0">No photo uploaded</p>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
                                 
-                                <div class="form-group">
-                                    <label for="id_student_image" class="form-label">Upload Student Photo</label>
+                                <!-- Upload Button -->
+                                <div class="upload-btn-wrapper mt-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100" onclick="document.getElementById('student_image_upload').click()">
+                                        <i class="fas fa-upload me-1"></i> Upload Photo
+                                    </button>
                                     <input type="file" 
-                                            class="form-control" 
+                                            class="d-none" 
                                             name="student_image" 
-                                            id="id_student_image"
+                                            id="student_image_upload"
                                             accept="image/*">
-                                    <small class="form-text text-muted">
-                                        Supported formats: JPG, PNG, JPEG. Max size: 5MB
-                                    </small>
                                 </div>
                                 
-                                <!-- Preview Image -->
-                                <div id="imagePreview" class="mt-3" style="display: none;">
-                                    <h6>Preview:</h6>
-                                    <img id="previewImg" class="img-thumbnail" style="max-width: 150px;">
+                                <!-- File Info -->
+                                <div id="fileInfo" class="mt-2 small text-muted" style="display: none;">
+                                    <i class="fas fa-file-image"></i> <span id="fileName"></span>
+                                    
                                 </div>
+                                
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Rest of the personal details -->
-                    <div class="col-md-4">
-                        {{ form.student_name|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.father_name|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.mother_name|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.date_of_birth|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.mobile_number|as_crispy_field }}
-                    </div>
-                    <div class="col-md-4">
-                        {{ form.address|as_crispy_field }}
-                    </div>
-                    <div class="col-md-3">
-                        {{ form.adhaar_number|as_crispy_field }}
-                    </div>
-                    <div class="col-md-3">
-                        {{ form.whatsapp_number|as_crispy_field }}
-                    </div>
-                    <div class="col-md-3">
-                        {{ form.blood_group|as_crispy_field }}
-                    </div>
-                    <div class="col-md-3">
-                        {{ form.category|as_crispy_field }}
+                    <!-- Personal Details Fields -->
+                    <div class="col-md-9">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.student_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.father_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.mother_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.date_of_birth|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.mobile_number|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.address|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.adhaar_number|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.whatsapp_number|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.blood_group|as_crispy_field }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form.category|as_crispy_field }}
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -255,23 +270,94 @@
     </div>
 </div>
 
-<!-- Add JavaScript for image preview -->
+{% comment %} <!-- Modal for Full Image Preview -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">
+                    <i class="fas fa-image me-2"></i>Student Photo Preview
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="modalImageContainer">
+                    <!-- Image will be loaded here dynamically -->
+                </div>
+                <div id="modalNoImage" class="d-none">
+                    <i class="fas fa-user-circle fa-5x text-muted mb-3"></i>
+                    <p class="text-muted">No photo available</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('student_image_upload').click()">
+                    <i class="fas fa-upload me-1"></i> Change Photo
+                </button>
+            </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+
+<!-- JavaScript for Image Upload and Preview -->
 <script>
+let currentImageUrl = null;
+
+function showPreview() {
+    const imageInput = document.getElementById('student_image_upload');
+    const modalImageContainer = document.getElementById('modalImageContainer');
+    const modalNoImage = document.getElementById('modalNoImage');
+    
+    if (imageInput.files && imageInput.files[0]) {
+        const file = imageInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            modalImageContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" alt="Student Photo Preview" style="max-height: 70vh;">`;
+            modalNoImage.classList.add('d-none');
+        }
+        
+        reader.readAsDataURL(file);
+    } else if (currentImageUrl) {
+        modalImageContainer.innerHTML = `<img src="${currentImageUrl}" class="img-fluid rounded" alt="Student Photo Preview" style="max-height: 70vh;">`;
+        modalNoImage.classList.add('d-none');
+    } else {
+        modalImageContainer.innerHTML = '';
+        modalNoImage.classList.remove('d-none');
+    }
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+    modal.show();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const imageInput = document.getElementById('id_student_image');
-    const previewContainer = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
+    const imageInput = document.getElementById('student_image_upload');
+    const imageDisplayContainer = document.getElementById('imageDisplayContainer');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileNameSpan = document.getElementById('fileName');
+    const form = document.getElementById('admissionForm');
+    
+    // Store current image URL if exists
+    const existingImage = document.querySelector('#imageDisplayContainer img');
+    if (existingImage && existingImage.src) {
+        currentImageUrl = existingImage.src;
+    }
     
     if (imageInput) {
         imageInput.addEventListener('change', function() {
             if (this.files && this.files[0]) {
                 const file = this.files[0];
                 
+                // Show file info
+                fileNameSpan.textContent = file.name;
+                fileInfo.style.display = 'block';
+                
                 // Check file size (5MB limit)
                 if (file.size > 5 * 1024 * 1024) {
                     alert('File size must be less than 5MB');
                     this.value = '';
-                    previewContainer.style.display = 'none';
+                    fileInfo.style.display = 'none';
                     return;
                 }
                 
@@ -280,29 +366,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!validTypes.includes(file.type)) {
                     alert('Please upload a valid image file (JPG, PNG, JPEG, GIF)');
                     this.value = '';
-                    previewContainer.style.display = 'none';
+                    fileInfo.style.display = 'none';
                     return;
                 }
                 
+                // Create preview in display container
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    previewContainer.style.display = 'block';
+                    // Update display container with new image
+                    imageDisplayContainer.innerHTML = `
+                        <img src="${e.target.result}" 
+                                alt="Student Photo" 
+                                class="img-fluid rounded clickable-preview" 
+                                style="max-height: 150px; object-fit: cover; cursor: pointer;"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#imagePreviewModal">
+                    `;
+                    
+                    // Update current image URL for modal
+                    currentImageUrl = e.target.result;
                 }
                 
                 reader.readAsDataURL(file);
             } else {
-                previewContainer.style.display = 'none';
+                // No file selected
+                fileInfo.style.display = 'none';
             }
         });
     }
     
-    // Form validation for file size
-    const form = document.querySelector('form');
+    // Form validation for file upload
     form.addEventListener('submit', function(e) {
-        const imageInput = document.getElementById('id_student_image');
-        
         if (imageInput && imageInput.files.length > 0) {
             const file = imageInput.files[0];
             
@@ -310,7 +405,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (file.size > 5 * 1024 * 1024) {
                 e.preventDefault();
                 alert('Image file size must be less than 5MB');
-                imageInput.focus();
                 return false;
             }
             
@@ -319,54 +413,154 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!validTypes.includes(file.type)) {
                 e.preventDefault();
                 alert('Please upload a valid image file (JPG, PNG, JPEG, GIF)');
-                imageInput.focus();
                 return false;
             }
         }
         
         return true;
     });
+    
+    // Handle form reset
+    form.addEventListener('reset', function() {
+        // Reset image preview
+        fileInfo.style.display = 'none';
+        
+        // Clear file input
+        if (imageInput) {
+            imageInput.value = '';
+        }
+        
+        // Restore original image if exists
+        if (currentImageUrl) {
+            imageDisplayContainer.innerHTML = `
+                <img src="${currentImageUrl}" 
+                        alt="Student Photo" 
+                        class="img-fluid rounded clickable-preview" 
+                        style="max-height: 150px; object-fit: cover; cursor: pointer;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#imagePreviewModal">
+            `;
+        } else {
+            imageDisplayContainer.innerHTML = `
+                <div class="border rounded p-3 bg-light" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                    <div>
+                        <i class="fas fa-user-circle fa-3x text-muted"></i>
+                        <p class="mt-2 small text-muted mb-0">No photo uploaded</p>
+                    </div>
+                </div>
+            `;
+        }
+    });
+    
+    // Initialize Bootstrap modal event
+    const imagePreviewModal = document.getElementById('imagePreviewModal');
+    if (imagePreviewModal) {
+        imagePreviewModal.addEventListener('show.bs.modal', function () {
+            showPreview();
+        });
+    }
 });
 </script>
 
 <style>
-/* Additional styles for the image upload section */
-.img-thumbnail {
-    border: 2px dashed #dee2e6;
-    padding: 5px;
-    background-color: #f8f9fa;
+/* Compact styles for the student photo section */
+.card {
+    border: 1px solid rgba(0,0,0,.125);
 }
 
 .card-header.bg-light {
     background-color: #f8f9fa !important;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid rgba(0,0,0,.125);
 }
 
-#previewImg {
-    max-height: 200px;
+.upload-btn-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-btn-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+
+/* Image display styles */
+#imageDisplayContainer img {
+    width: 100%;
+    height: 150px;
     object-fit: cover;
+    border-radius: 4px;
+    transition: transform 0.2s;
 }
 
-/* Make sure the form handles file inputs properly */
-.form-control[type="file"] {
-    padding: 0.375rem 0.75rem;
-    line-height: 1.5;
+#imageDisplayContainer img:hover {
+    transform: scale(1.02);
 }
 
-.form-control[type="file"]::-webkit-file-upload-button {
-    color: #fff;
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-    padding: 0.375rem 0.75rem;
-    margin-right: 0.75rem;
-    border-radius: 0.25rem;
+.clickable-preview {
     cursor: pointer;
-    transition: all 0.15s ease-in-out;
 }
 
-.form-control[type="file"]::-webkit-file-upload-button:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+/* File info styling */
+#fileInfo {
+    background-color: #e9ecef;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#fileInfo .btn-link {
+    text-decoration: none;
+    font-size: 13px;
+}
+
+#fileInfo .btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body.p-3 {
+        padding: 1rem !important;
+    }
+    
+    #fileInfo {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+/* Button styles */
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Modal styles */
+.modal-dialog {
+    max-width: 800px;
+}
+
+.modal-body img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Form field spacing */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+/* Ensure crispy forms looks good */
+.asteriskField {
+    color: #dc3545;
+    margin-left: 2px;
 }
 </style>
 {% endblock %}

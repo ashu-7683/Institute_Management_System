@@ -1,3 +1,4 @@
+<!-- admin_dashboard.html - Updated version -->
 {% extends 'institute/base.html' %}
 
 {% block content %}
@@ -112,6 +113,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
+                            <th>Student Photo</th>
                             <th>Student Name</th>
                             <th>Father's Name</th>
                             <th>Mobile</th>
@@ -124,6 +126,21 @@
                         {% for admission in admissions %}
                         <tr>
                             <td>{{ admission.id }}</td>
+                            <td>
+                                {% if admission.student_image %}
+                                <img src="{{ admission.student_image.url }}" 
+                                        alt="{{ admission.student_name }}" 
+                                        class="student-photo-thumb"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#studentDetailsModal"
+                                        data-id="{{ admission.id }}"
+                                        style="cursor: pointer;">
+                                {% else %}
+                                <div class="no-photo-thumb" style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </td>
                             <td>
                                 <strong>{{ admission.student_name }}</strong>
                                 {% if admission.adhaar_number %}
@@ -153,11 +170,24 @@
                                             data-whatsapp="{{ admission.whatsapp_number }}"
                                             data-aadhaar="{{ admission.adhaar_number }}"
                                             data-address="{{ admission.address }}"
+                                            data-blood="{{ admission.blood_group }}"
+                                            data-category="{{ admission.category }}"
                                             data-course="{{ admission.course }}"
                                             data-college="{{ admission.college_name }}"
+                                            data-board="{{ admission.board_name }}"
                                             data-roll="{{ admission.college_roll_no }}"
                                             data-batch="{{ admission.batch }}"
-                                            data-date="{{ admission.created_at|date:'d/m/Y' }}">
+                                            data-eleventh="{{ admission.eleventh_year }}"
+                                            data-twelfth="{{ admission.twelfth_year }}"
+                                            data-enrolled="{{ admission.enrolled_for }}"
+                                            data-samsid="{{ admission.sams_login_id }}"
+                                            data-samspass="{{ admission.sams_password }}"
+                                            data-hostel="{{ admission.hostel_fees }}"
+                                            data-tms="{{ admission.tms_fees }}"
+                                            data-collegefees="{{ admission.admitted_college_fees }}"
+                                            data-transport="{{ admission.college_transportation }}"
+                                            data-date="{{ admission.created_at|date:'d/m/Y' }}"
+                                            data-image="{% if admission.student_image %}{{ admission.student_image.url }}{% endif %}">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                     <a href="{% url 'search_admission' %}?search={{ admission.student_name }}" 
@@ -238,75 +268,188 @@
     </div>
 </div>
 
-<!-- Student Details Modal -->
+<!-- Enhanced Student Details Modal -->
 <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="studentDetailsModalLabel">Student Admission Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="studentDetailsModalLabel">
+                    <i class="fas fa-user-graduate me-2"></i>Student Admission Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
-                        <div class="mb-2">
-                            <small class="text-muted">Student Name:</small>
-                            <p class="mb-0 fw-bold" id="detail-name">-</p>
+                    <!-- Left Column - Personal Details & Photo -->
+                    <div class="col-md-4">
+                        <!-- Student Photo -->
+                        <div class="text-center mb-4">
+                            <div id="detail-image-container" class="mb-3">
+                                <div id="detail-no-image" class="d-none">
+                                    <i class="fas fa-user-circle fa-5x text-muted"></i>
+                                    <p class="text-muted mt-2">No photo uploaded</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Father's Name:</small>
-                            <p class="mb-0" id="detail-father">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Mother's Name:</small>
-                            <p class="mb-0" id="detail-mother">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Date of Birth:</small>
-                            <p class="mb-0" id="detail-dob">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Mobile Number:</small>
-                            <p class="mb-0" id="detail-mobile">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">WhatsApp Number:</small>
-                            <p class="mb-0" id="detail-whatsapp">-</p>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-user me-2"></i>Personal Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">Student Name:</small>
+                                    <p class="mb-0 fw-bold" id="detail-name">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Father's Name:</small>
+                                    <p class="mb-0" id="detail-father">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Mother's Name:</small>
+                                    <p class="mb-0" id="detail-mother">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Date of Birth:</small>
+                                    <p class="mb-0" id="detail-dob">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Mobile Number:</small>
+                                    <p class="mb-0" id="detail-mobile">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">WhatsApp Number:</small>
+                                    <p class="mb-0" id="detail-whatsapp">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Blood Group:</small>
+                                    <p class="mb-0" id="detail-blood">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Category:</small>
+                                    <p class="mb-0" id="detail-category">-</p>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Aadhaar Number:</small>
+                                    <p class="mb-0" id="detail-aadhaar">-</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <h6 class="border-bottom pb-2 mb-3">Academic Information</h6>
-                        <div class="mb-2">
-                            <small class="text-muted">Course:</small>
-                            <p class="mb-0 fw-bold" id="detail-course">-</p>
+                    
+                    <!-- Right Column - Academic & Other Details -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <!-- Academic Information -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-university me-2"></i>Academic Information</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Course:</small>
+                                            <p class="mb-0 fw-bold" id="detail-course">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">College Name:</small>
+                                            <p class="mb-0" id="detail-college">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Board Name:</small>
+                                            <p class="mb-0" id="detail-board">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">College Roll No:</small>
+                                            <p class="mb-0" id="detail-roll">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Batch:</small>
+                                            <p class="mb-0" id="detail-batch">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">11th Year:</small>
+                                            <p class="mb-0" id="detail-eleventh">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">12th Year:</small>
+                                            <p class="mb-0" id="detail-twelfth">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Enrollment & Fees -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Enrollment Details</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Enrolled For:</small>
+                                            <p class="mb-0" id="detail-enrolled">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">SAMS Login ID:</small>
+                                            <p class="mb-0" id="detail-samsid">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">SAMS Password:</small>
+                                            <p class="mb-0" id="detail-samspass">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Fees Details</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Hostel Fees (₹):</small>
+                                            <p class="mb-0" id="detail-hostel">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">TMS Fees (₹):</small>
+                                            <p class="mb-0" id="detail-tms">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">College Fees (₹):</small>
+                                            <p class="mb-0" id="detail-collegefees">-</p>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Transportation:</small>
+                                            <p class="mb-0" id="detail-transport">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <small class="text-muted">College Name:</small>
-                            <p class="mb-0" id="detail-college">-</p>
+                        
+                        <!-- Address Section -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-home me-2"></i>Address</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0" id="detail-address">-</p>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <small class="text-muted">College Roll No:</small>
-                            <p class="mb-0" id="detail-roll">-</p>
+                        
+                        <!-- Additional Info -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between text-muted">
+                                    <div>
+                                        <small>Admission ID: <span id="detail-id">-</span></small>
+                                    </div>
+                                    <div>
+                                        <small>Applied Date: <span id="detail-date">-</span></small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Batch:</small>
-                            <p class="mb-0" id="detail-batch">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Aadhaar Number:</small>
-                            <p class="mb-0" id="detail-aadhaar">-</p>
-                        </div>
-                        <div class="mb-2">
-                            <small class="text-muted">Applied Date:</small>
-                            <p class="mb-0" id="detail-date">-</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <h6 class="border-bottom pb-2 mb-3">Address</h6>
-                        <p class="mb-0" id="detail-address">-</p>
                     </div>
                 </div>
             </div>
@@ -321,6 +464,20 @@
 </div>
 
 <style>
+    .student-photo-thumb {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s;
+    }
+    
+    .student-photo-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
     .table th {
         background-color: #f8f9fa;
         color: #1e3a8a;
@@ -356,6 +513,26 @@
         background-color: #1e3a8a;
         border-color: #1e3a8a;
     }
+    
+    .modal-xl {
+        max-width: 1200px;
+    }
+    
+    #detail-image-container img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 3px solid #f0f0f0;
+    }
+    
+    .card {
+        border: 1px solid rgba(0,0,0,.125);
+    }
+    
+    .card-header.bg-light {
+        background-color: #f8f9fa !important;
+    }
 </style>
 
 <script>
@@ -364,44 +541,99 @@
         const viewButtons = document.querySelectorAll('.view-details-btn');
         const modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
         const editBtn = document.getElementById('editAdmissionBtn');
+        const imageContainer = document.getElementById('detail-image-container');
+        const noImageDiv = document.getElementById('detail-no-image');
         
+        // Function to populate modal
+        function populateModal(button) {
+            const admissionId = button.getAttribute('data-id');
+            const studentName = button.getAttribute('data-name');
+            const fatherName = button.getAttribute('data-father');
+            const motherName = button.getAttribute('data-mother');
+            const dob = button.getAttribute('data-dob');
+            const mobile = button.getAttribute('data-mobile');
+            const whatsapp = button.getAttribute('data-whatsapp');
+            const aadhaar = button.getAttribute('data-aadhaar');
+            const address = button.getAttribute('data-address');
+            const blood = button.getAttribute('data-blood');
+            const category = button.getAttribute('data-category');
+            const course = button.getAttribute('data-course');
+            const college = button.getAttribute('data-college');
+            const board = button.getAttribute('data-board');
+            const roll = button.getAttribute('data-roll');
+            const batch = button.getAttribute('data-batch');
+            const eleventh = button.getAttribute('data-eleventh');
+            const twelfth = button.getAttribute('data-twelfth');
+            const enrolled = button.getAttribute('data-enrolled');
+            const samsid = button.getAttribute('data-samsid');
+            const samspass = button.getAttribute('data-samspass');
+            const hostel = button.getAttribute('data-hostel');
+            const tms = button.getAttribute('data-tms');
+            const collegefees = button.getAttribute('data-collegefees');
+            const transport = button.getAttribute('data-transport');
+            const appliedDate = button.getAttribute('data-date');
+            const imageUrl = button.getAttribute('data-image');
+            
+            // Populate modal fields
+            document.getElementById('detail-id').textContent = admissionId;
+            document.getElementById('detail-name').textContent = studentName || '-';
+            document.getElementById('detail-father').textContent = fatherName || '-';
+            document.getElementById('detail-mother').textContent = motherName || '-';
+            document.getElementById('detail-dob').textContent = dob || '-';
+            document.getElementById('detail-mobile').textContent = mobile || '-';
+            document.getElementById('detail-whatsapp').textContent = whatsapp || 'Not provided';
+            document.getElementById('detail-aadhaar').textContent = aadhaar || 'Not provided';
+            document.getElementById('detail-address').textContent = address || 'Not provided';
+            document.getElementById('detail-blood').textContent = blood || 'Not provided';
+            document.getElementById('detail-category').textContent = category || 'Not provided';
+            document.getElementById('detail-course').textContent = course || '-';
+            document.getElementById('detail-college').textContent = college || 'Not provided';
+            document.getElementById('detail-board').textContent = board || 'Not provided';
+            document.getElementById('detail-roll').textContent = roll || 'Not provided';
+            document.getElementById('detail-batch').textContent = batch || 'Not provided';
+            document.getElementById('detail-eleventh').textContent = eleventh || 'Not provided';
+            document.getElementById('detail-twelfth').textContent = twelfth || 'Not provided';
+            document.getElementById('detail-enrolled').textContent = enrolled || 'Not provided';
+            document.getElementById('detail-samsid').textContent = samsid || 'Not provided';
+            document.getElementById('detail-samspass').textContent = samspass || 'Not provided';
+            document.getElementById('detail-hostel').textContent = hostel ? '₹' + parseFloat(hostel).toFixed(2) : '₹0.00';
+            document.getElementById('detail-tms').textContent = tms ? '₹' + parseFloat(tms).toFixed(2) : '₹0.00';
+            document.getElementById('detail-collegefees').textContent = collegefees ? '₹' + parseFloat(collegefees).toFixed(2) : '₹0.00';
+            document.getElementById('detail-transport').textContent = transport || 'Not provided';
+            document.getElementById('detail-date').textContent = appliedDate || '-';
+            
+            // Handle image
+            if (imageUrl) {
+                imageContainer.innerHTML = `<img src="${imageUrl}" alt="${studentName}" class="img-fluid">`;
+                noImageDiv.classList.add('d-none');
+            } else {
+                imageContainer.innerHTML = '';
+                noImageDiv.classList.remove('d-none');
+            }
+            
+            // Set edit button URL
+            if (admissionId && studentName) {
+                editBtn.onclick = function() {
+                    window.location.href = "{% url 'search_admission' %}?search=" + encodeURIComponent(studentName);
+                };
+            }
+        }
+        
+        // Add click event to view buttons
         viewButtons.forEach(button => {
             button.addEventListener('click', function() {
+                populateModal(this);
+            });
+        });
+        
+        // Add click event to student photo thumbnails
+        document.querySelectorAll('.student-photo-thumb').forEach(thumb => {
+            thumb.addEventListener('click', function() {
                 const admissionId = this.getAttribute('data-id');
-                const studentName = this.getAttribute('data-name');
-                const fatherName = this.getAttribute('data-father');
-                const motherName = this.getAttribute('data-mother');
-                const dob = this.getAttribute('data-dob');
-                const mobile = this.getAttribute('data-mobile');
-                const whatsapp = this.getAttribute('data-whatsapp');
-                const aadhaar = this.getAttribute('data-aadhaar');
-                const address = this.getAttribute('data-address');
-                const course = this.getAttribute('data-course');
-                const college = this.getAttribute('data-college');
-                const roll = this.getAttribute('data-roll');
-                const batch = this.getAttribute('data-batch');
-                const appliedDate = this.getAttribute('data-date');
-                
-                // Populate modal
-                document.getElementById('detail-name').textContent = studentName;
-                document.getElementById('detail-father').textContent = fatherName;
-                document.getElementById('detail-mother').textContent = motherName;
-                document.getElementById('detail-dob').textContent = dob;
-                document.getElementById('detail-mobile').textContent = mobile;
-                document.getElementById('detail-whatsapp').textContent = whatsapp || 'Not provided';
-                document.getElementById('detail-aadhaar').textContent = aadhaar || 'Not provided';
-                document.getElementById('detail-address').textContent = address || 'Not provided';
-                document.getElementById('detail-course').textContent = course;
-                document.getElementById('detail-college').textContent = college;
-                document.getElementById('detail-roll').textContent = roll;
-                document.getElementById('detail-batch').textContent = batch;
-                document.getElementById('detail-date').textContent = appliedDate;
-                
-                // Set edit button URL
-                if (admissionId) {
-                    editBtn.onclick = function() {
-                        window.location.href = "{% url 'search_admission' %}?search=" + encodeURIComponent(studentName);
-                    };
+                // Find the corresponding view button for this admission
+                const viewButton = document.querySelector(`.view-details-btn[data-id="${admissionId}"]`);
+                if (viewButton) {
+                    populateModal(viewButton);
                 }
             });
         });
@@ -422,5 +654,3 @@
     });
 </script>
 {% endblock %}
-
-<!-- Note: Don't add copyright block here - base template will handle it -->

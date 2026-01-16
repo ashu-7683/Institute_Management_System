@@ -138,7 +138,7 @@ def delete_user(request, user_id):
 
 def admission_form(request):
     if request.method == 'POST':
-        form = AdmissionForm(request.POST)
+        form = AdmissionForm(request.POST, request.FILES)
         if form.is_valid():
             admission = form.save(commit=False)
             # Link to user if they are logged in
