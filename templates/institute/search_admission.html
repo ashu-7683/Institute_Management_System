@@ -1,4 +1,3 @@
-<!-- search_admission.html - UPDATED with proper form handling -->
 {% extends 'institute/base.html' %}
 {% load static %}
 
@@ -16,31 +15,104 @@
         {% endfor %}
     {% endif %}
     
-    <!-- Search Form -->
+    <!-- Search Form with Tabs -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <h5 class="card-title mb-3">
                 <i class="fas fa-search me-2 text-primary"></i>Search Admission
             </h5>
-            <form method="GET" action="{% url 'search_admission' %}" class="row g-3">
-                <div class="col-md-8">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-user-graduate"></i>
-                        </span>
-                        <input type="text" 
-                                class="form-control" 
-                                name="search" 
-                                placeholder="Search by Student Name, Mobile Number, Father's Name, or Aadhaar Number"
-                                value="{{ search_query|default:'' }}">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search me-1"></i> Search
+            
+            <!-- Search Options Tabs -->
+            <ul class="nav nav-tabs mb-3" id="searchTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if search_type == 'mobile' or not search_type %}active{% endif %}" id="mobile-tab" data-bs-toggle="tab" data-bs-target="#mobile-search" type="button" role="tab">
+                        <i class="fas fa-mobile-alt me-1"></i> By Mobile
                     </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if search_type == 'admission_id' %}active{% endif %}" id="admission-id-tab" data-bs-toggle="tab" data-bs-target="#admission-id-search" type="button" role="tab">
+                        <i class="fas fa-id-card me-1"></i> By Admission ID
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link {% if search_type == 'general' and search_performed %}active{% endif %}" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-search" type="button" role="tab">
+                        <i class="fas fa-search me-1"></i> General Search
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="searchTabsContent">
+                <!-- Mobile Search Tab -->
+                <div class="tab-pane fade {% if search_type == 'mobile' or not search_type %}show active{% endif %}" id="mobile-search" role="tabpanel">
+                    <form method="GET" action="{% url 'search_admission' %}" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </span>
+                                <input type="text" 
+                                        class="form-control" 
+                                        name="search" 
+                                        placeholder="Enter 10-digit mobile number"
+                                        value="{% if search_type == 'mobile' %}{{ search_query }}{% endif %}">
+                            </div>
+                            <small class="form-text text-muted">Enter 10-digit mobile number</small>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search by Mobile
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+                
+                <!-- Admission ID Search Tab -->
+                <div class="tab-pane fade {% if search_type == 'admission_id' %}show active{% endif %}" id="admission-id-search" role="tabpanel">
+                    <form method="GET" action="{% url 'search_admission' %}" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-id-card"></i>
+                                </span>
+                                <input type="text" 
+                                        class="form-control" 
+                                        name="search" 
+                                        placeholder="Enter Admission ID (e.g., TMIS0001)"
+                                        value="{% if search_type == 'admission_id' %}{{ search_query }}{% endif %}">
+                            </div>
+                            <small class="form-text text-muted">Format: TMIS followed by 4 digits (e.g., TMIS0001)</small>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search by ID
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- General Search Tab -->
+                <div class="tab-pane fade {% if search_type == 'general' and search_performed %}show active{% endif %}" id="general-search" role="tabpanel">
+                    <form method="GET" action="{% url 'search_admission' %}" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-user-graduate"></i>
+                                </span>
+                                <input type="text" 
+                                        class="form-control" 
+                                        name="search" 
+                                        placeholder="Search by Name, Father's Name, Aadhaar, or Admission ID"
+                                        value="{% if search_type == 'general' %}{{ search_query }}{% endif %}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             
             {% if search_performed %}
                 <div class="mt-3">
@@ -49,7 +121,8 @@
                             <i class="fas fa-check-circle me-2"></i>
                             Found: <strong>{{ admission.student_name }}</strong> 
                             (Mobile: {{ admission.mobile_number }})
-                            <span class="badge bg-info ms-2">Admission ID: {{ admission.id }}</span>
+                            <span class="badge bg-info ms-2">Admission ID: {{ admission.admission_id|default:"Not assigned" }}</span>
+                            <span class="badge bg-secondary ms-1">Database ID: {{ admission.id }}</span>
                         </div>
                     {% elif search_query %}
                         <div class="alert alert-warning">
@@ -68,17 +141,18 @@
             <h5 class="card-title mb-3">
                 {% if admission %}
                     <i class="fas fa-edit me-2 text-warning"></i>Edit Admission
-                    <span class="badge bg-info float-end">Editing: {{ admission.student_name }} (ID: {{ admission.id }})</span>
+                    <span class="badge bg-info float-end">Editing: {{ admission.student_name }} (Admission ID: {{ admission.admission_id|default:"Not assigned" }})</span>
                 {% else %}
                     <i class="fas fa-plus-circle me-2 text-success"></i>Create New Admission
                 {% endif %}
             </h5>
             
-            <!-- Add debug info -->
             {% if admission %}
                 <div class="alert alert-info mb-3">
                     <i class="fas fa-info-circle me-2"></i>
-                    You are editing admission ID: <strong>{{ admission.id }}</strong>. 
+                    You are editing admission for <strong>{{ admission.student_name }}</strong>. 
+                    Admission ID: <strong>{{ admission.admission_id|default:"Will be generated upon save" }}</strong>
+                    (Database ID: {{ admission.id }}).
                     All changes will be saved when you click "Update Admission".
                 </div>
             {% endif %}
@@ -717,7 +791,7 @@
                 <table class="table table-sm table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
+                            <th>Admission ID</th>
                             <th>Student Photo</th>
                             <th>Student Name</th>
                             <th>Mobile</th>
@@ -730,7 +804,9 @@
                     <tbody>
                         {% for recent_admission in recent_admissions %}
                         <tr>
-                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ recent_admission.admission_id|default:"None" }}</span>
+                            </td>
                             <td>
                                 {% if recent_admission.student_image %}
                                 <img src="{{ recent_admission.student_image.url }}" 
@@ -749,7 +825,7 @@
                             <td><span class="badge bg-info">{{ recent_admission.course }}</span></td>
                             <td>{{ recent_admission.created_at|date:"d/m/Y" }}</td>
                             <td>
-                                <a href="{% url 'search_admission' %}?search={{ recent_admission.mobile_number }}" 
+                                <a href="{% url 'search_admission' %}?search={{ recent_admission.admission_id|default:recent_admission.mobile_number }}" 
                                     class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
@@ -813,6 +889,17 @@
     
     .student-photo-thumb-small:hover {
         transform: scale(1.1);
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #1e3a8a;
+        font-weight: 600;
+        border-bottom: 2px solid #1e3a8a;
     }
 </style>
 
@@ -887,7 +974,6 @@
         // Reset form functionality
         if (resetFormBtn) {
             resetFormBtn.addEventListener('click', function() {
-                // If we're editing an admission, redirect to new admission page
                 {% if admission %}
                     window.location.href = "{% url 'search_admission' %}";
                 {% else %}
@@ -992,6 +1078,19 @@
                 this.classList.remove('is-invalid');
             });
         });
+        
+        // Auto-format admission ID input
+        const admissionIdInput = document.querySelector('#admission-id-search input[name="search"]');
+        if (admissionIdInput) {
+            admissionIdInput.addEventListener('input', function() {
+                let value = this.value.toUpperCase();
+                if (value && !value.startsWith('TMIS')) {
+                    value = 'TMIS' + value.replace(/[^0-9]/g, '');
+                }
+                value = value.replace(/[^A-Z0-9]/g, '');
+                this.value = value;
+            });
+        }
     });
 </script>
 {% endblock %}

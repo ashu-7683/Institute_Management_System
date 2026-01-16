@@ -1,5 +1,4 @@
-# models.py - UPDATE THE Admission MODEL
-
+# models.py - COMPLETE UPDATED FILE
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -20,7 +19,7 @@ class CustomUser(AbstractUser):
         return f"{self.username} - {self.user_type}"
 
 class Admission(models.Model):
-    # Custom Admission ID Field - ADD THIS
+    # Custom Admission ID Field
     admission_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Admission ID")
     
     # Student Image Field
@@ -110,4 +109,5 @@ class Admission(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.admission_id} - {self.student_name} - {self.enrolled_for}"
+        admission_id_display = self.admission_id if self.admission_id else f"ID:{self.id}"
+        return f"{admission_id_display} - {self.student_name} - {self.enrolled_for}"
