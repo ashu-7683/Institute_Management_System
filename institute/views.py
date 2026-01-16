@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib import messages
 from .models import CustomUser, Admission
@@ -46,6 +47,49 @@ def forgot_password(request):
 def user_logout(request):
     logout(request)
     return redirect('home')
+
+@login_required
+@staff_member_required
+def register_organization(request):
+    if request.method == 'POST':
+        # Handle form submission
+        org_name = request.POST.get('org_name')
+        address = request.POST.get('address')
+        mobile = request.POST.get('mobile')
+        email = request.POST.get('email')
+        regd_no = request.POST.get('regd_no')
+        
+        # Handle logo upload
+        if 'org_logo' in request.FILES:
+            logo_file = request.FILES['org_logo']
+            
+            # Validate file type
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml']
+            if logo_file.content_type not in allowed_types:
+                messages.error(request, 'Invalid file type. Please upload an image file.')
+                return render(request, 'institute/register_organization.html')
+            
+            # Validate file size (5MB max)
+            if logo_file.size > 5 * 1024 * 1024:
+                messages.error(request, 'File size exceeds 5MB limit.')
+                return render(request, 'institute/register_organization.html')
+            
+            # Save the file
+            # fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'organization_logos'))
+            # filename = fs.save(f"{regd_no.replace('/', '_')}_{logo_file.name}", logo_file)
+            # logo_url = fs.url(filename)
+            
+            # Save logo URL to database or process it
+            # Your logic here...
+        
+        # Save other form data to database
+        # Your logic here...
+        
+        messages.success(request, 'Organization registered successfully!')
+        return redirect('admin_dashboard')
+    
+    return render(request, 'institute/register_organization.html')
+
 
 @login_required
 def admin_dashboard(request):
@@ -101,6 +145,9 @@ def manage_users(request):
 
 @login_required
 def edit_user(request, user_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
     if request.method == 'POST':
         user = get_object_or_404(CustomUser, id=user_id)
         
@@ -112,33 +159,48 @@ def edit_user(request, user_id):
         
         # Update password only if provided
         password = request.POST.get('password')
-        if password:
+        if password and password.strip() != '':
             user.set_password(password)
         
         user.save()
         messages.success(request, f'User {user.username} updated successfully!')
-        return redirect('manage_users')
     
     return redirect('manage_users')
 
 
-@csrf_exempt
+# UPDATE THE delete_user FUNCTION IN views.py
+
 @login_required
 def delete_user(request, user_id):
+    if request.user.user_type != 'admin':
+        messages.error(request, 'Only admins can delete users.')
+        return redirect('manage_users')
+    
     if request.method == 'POST':
         try:
             user = get_object_or_404(CustomUser, id=user_id)
+            username = user.username
             
             # Prevent deleting yourself
             if user == request.user:
-                return JsonResponse({'success': False, 'error': 'You cannot delete your own account.'})
+                messages.error(request, 'You cannot delete your own account!')
+                return redirect('manage_users')
+            
+            # Prevent deleting the last admin
+            if user.user_type == 'admin':
+                admin_count = CustomUser.objects.filter(user_type='admin').count()
+                if admin_count <= 1:
+                    messages.error(request, 'Cannot delete the last admin account!')
+                    return redirect('manage_users')
             
             user.delete()
-            return JsonResponse({'success': True})
+            messages.success(request, f'User "{username}" has been deleted successfully!')
+            
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+            messages.error(request, f'Error deleting user: {str(e)}')
     
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+    return redirect('manage_users')
+
 
 def admission_form(request):
     if request.method == 'POST':

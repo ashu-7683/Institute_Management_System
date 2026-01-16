@@ -487,6 +487,64 @@
                 top: 140px;
             }
         }
+
+        /* Additional styles for registration form */
+        .registration-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-header {
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #dc2626;
+        }
+        
+        .help-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .regd-format {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            font-family: monospace;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -578,6 +636,16 @@
                         <span>Manage Users</span>
                     </a>
                 </li>
+                
+                <!-- Register Organization (Only for admin users) -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'register-organization' in request.path %}active{% endif %}" 
+                        href="{% url 'register_organization' %}">
+                        <i class="nav-icon fas fa-building"></i>
+                        <span>Register Organization</span>
+                    </a>
+                </li>
+                
                 {% if user.user_type == 'admin' %}
                 <!-- Search Admission (Only for admin users) -->
                 <li class="nav-item">

@@ -1,0 +1,530 @@
+[file name]: register_organization.html
+[file content begin]
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="registration-form">
+    <div class="form-section">
+        <div class="form-header">
+            <h2 class="mb-3" style="color: #1e3a8a;">
+                <i class="fas fa-building me-2"></i>Register Organization
+            </h2>
+            <p class="text-muted">Register a new organization with TMIS portal</p>
+        </div>
+        
+        <form method="POST" action="{% url 'register_organization' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Organization Details -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-4" style="color: #1e40af;">
+                        <i class="fas fa-info-circle me-2"></i>Organization Information
+                    </h5>
+                </div>
+                
+                <div class="col-md-12 mb-3">
+                    <label for="org_name" class="form-label required">Name of Organization</label>
+                    <input type="text" class="form-control" id="org_name" name="org_name" 
+                        placeholder="Enter full organization name" required>
+                    <div class="help-text">Enter the complete legal name of your organization</div>
+                </div>
+                
+                <div class="col-md-12 mb-3">
+                    <label for="address" class="form-label required">Address</label>
+                    <textarea class="form-control" id="address" name="address" 
+                            rows="3" placeholder="Enter complete address" required></textarea>
+                    <div class="help-text">Include street, city, state, and postal code</div>
+                </div>
+            </div>
+            
+            <!-- Logo Upload Section -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-4" style="color: #1e40af;">
+                        <i class="fas fa-image me-2"></i>Organization Logo
+                    </h5>
+                </div>
+                
+                <div class="col-md-12">
+                    <div class="logo-upload-container">
+                        <!-- Logo Preview -->
+                        <div class="logo-preview-section mb-4">
+                            <div class="d-flex align-items-center">
+                                <div class="logo-preview-wrapper me-4">
+                                    <div id="logoPreview" class="logo-preview-placeholder">
+                                        <i class="fas fa-building fa-3x text-muted"></i>
+                                        <p class="mt-2 mb-0 text-muted small">Logo Preview</p>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6>Upload Organization Logo</h6>
+                                    <p class="text-muted small mb-3">
+                                        Upload a high-quality logo for your organization. This will be displayed on certificates, letters, and other official documents.
+                                    </p>
+                                    
+                                    <!-- File Upload Input -->
+                                    <div class="file-upload-wrapper">
+                                        <input type="file" class="form-control" id="org_logo" name="org_logo" 
+                                                accept=".jpg,.jpeg,.png,.gif,.svg" 
+                                                onchange="previewLogo(event)">
+                                        
+                                        <div class="help-text mt-2">
+                                            <strong>Requirements:</strong>
+                                            <ul class="mb-0 mt-1">
+                                                <li>Maximum file size: 5MB</li>
+                                                <li>Allowed formats: JPG, PNG, GIF, SVG</li>
+                                                <li>Recommended dimensions: 300x300 pixels (square)</li>
+                                                <li>For best results, use a transparent background PNG</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <!-- File Info Display -->
+                                        <div id="fileInfo" class="file-info mt-3" style="display: none;">
+                                            <div class="alert alert-light d-flex align-items-center">
+                                                <i class="fas fa-file-image text-primary me-3"></i>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span id="fileName"></span>
+                                                        <span id="fileSize" class="badge bg-secondary"></span>
+                                                    </div>
+                                                    <div class="progress mt-2" style="height: 4px;">
+                                                        <div id="uploadProgress" class="progress-bar bg-primary" 
+                                                            role="progressbar" style="width: 0%"></div>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn-close ms-3" 
+                                                        onclick="removeLogo()"></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-4" style="color: #1e40af;">
+                        <i class="fas fa-address-book me-2"></i>Contact Information
+                    </h5>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="mobile" class="form-label required">Mobile Number</label>
+                    <input type="tel" class="form-control" id="mobile" name="mobile" 
+                        placeholder="Enter 10-digit mobile number" pattern="[0-9]{10}" required>
+                    <div class="help-text">Format: 9876543210</div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label required">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                        placeholder="Enter email address" required>
+                    <div class="help-text">Enter a valid email address for communication</div>
+                </div>
+            </div>
+            
+            <!-- Registration Details -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-4" style="color: #1e40af;">
+                        <i class="fas fa-id-card me-2"></i>Registration Details
+                    </h5>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="regd_no" class="form-label required">Registration Number</label>
+                    <input type="text" class="form-control" id="regd_no" name="regd_no" 
+                        placeholder="Enter registration number" required>
+                    <div class="help-text">
+                        <strong>Format should be: TMIS/01</strong>
+                    </div>
+                    <div class="regd-format mt-2">
+                        <small>Example: TMIS/01, TMIS/02, TMIS/102, etc.</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="registration_date" class="form-label">Registration Date</label>
+                    <input type="date" class="form-control" id="registration_date" name="registration_date">
+                    <div class="help-text">Date of organization registration (optional)</div>
+                </div>
+            </div>
+            
+            <!-- Additional Information -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5 class="mb-4" style="color: #1e40af;">
+                        <i class="fas fa-file-alt me-2"></i>Additional Information
+                    </h5>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="org_type" class="form-label">Organization Type</label>
+                    <select class="form-select" id="org_type" name="org_type">
+                        <option value="">Select type</option>
+                        <option value="educational">Educational Institution</option>
+                        <option value="coaching">Coaching Center</option>
+                        <option value="trust">Trust/Foundation</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="contact_person" class="form-label">Contact Person</label>
+                    <input type="text" class="form-control" id="contact_person" name="contact_person" 
+                        placeholder="Name of contact person">
+                </div>
+                
+                <div class="col-md-12 mb-3">
+                    <label for="remarks" class="form-label">Remarks</label>
+                    <textarea class="form-control" id="remarks" name="remarks" 
+                            rows="2" placeholder="Any additional remarks or notes"></textarea>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="row mt-5">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Submit Registration
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Information Card -->
+    <div class="form-section">
+        <h5 class="mb-3" style="color: #1e40af;">
+            <i class="fas fa-lightbulb me-2"></i>Important Information
+        </h5>
+        <div class="alert alert-info">
+            <div class="d-flex">
+                <i class="fas fa-info-circle fa-2x me-3 mt-1"></i>
+                <div>
+                    <h6 class="alert-heading mb-2">Registration Guidelines</h6>
+                    <ul class="mb-0">
+                        <li>All fields marked with <span class="text-danger">*</span> are mandatory</li>
+                        <li>Registration number must follow the format: <code>TMIS/XXX</code></li>
+                        <li>Logo should be high-quality and represent your organization professionally</li>
+                        <li>You will receive a confirmation email upon successful registration</li>
+                        <li>Registered organizations will be approved within 2-3 working days</li>
+                        <li>For any issues, contact: <strong>support@tmis.edu</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<style>
+    /* Additional CSS for logo upload */
+    .logo-upload-container {
+        background: #f8fafc;
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 25px;
+        transition: all 0.3s;
+    }
+    
+    .logo-upload-container:hover {
+        border-color: #3b82f6;
+        background: #f0f7ff;
+    }
+    
+    .logo-preview-wrapper {
+        width: 150px;
+        height: 150px;
+        min-width: 150px;
+    }
+    
+    .logo-preview-placeholder {
+        width: 100%;
+        height: 100%;
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+    
+    .logo-preview-placeholder.has-logo {
+        border: 2px solid #3b82f6;
+        padding: 5px;
+    }
+    
+    #logoPreview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .file-upload-wrapper input[type="file"] {
+        padding: 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        transition: all 0.3s;
+    }
+    
+    .file-upload-wrapper input[type="file"]:hover {
+        border-color: #3b82f6;
+        background: #f0f7ff;
+    }
+    
+    .file-upload-wrapper input[type="file"]::file-selector-button {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        margin-right: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .file-upload-wrapper input[type="file"]::file-selector-button:hover {
+        background: #2563eb;
+    }
+    
+    .file-info {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .help-text ul {
+        padding-left: 20px;
+    }
+    
+    .help-text li {
+        margin-bottom: 3px;
+    }
+    
+    .progress {
+        background-color: #e5e7eb;
+    }
+    
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+</style>
+
+<script>
+    // Logo preview function
+    function previewLogo(event) {
+        const input = event.target;
+        const preview = document.getElementById('logoPreview');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Check file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+                alert('File size exceeds 5MB limit. Please choose a smaller file.');
+                input.value = '';
+                return;
+            }
+            
+            // Check file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'];
+            if (!validTypes.includes(file.type)) {
+                alert('Please select a valid image file (JPG, PNG, GIF, SVG).');
+                input.value = '';
+                return;
+            }
+            
+            // Update file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            
+            // Show file info with animation
+            fileInfo.style.display = 'block';
+            
+            // Simulate upload progress (in real app, this would be from server)
+            simulateUploadProgress();
+            
+            // Create preview
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.innerHTML = '';
+                preview.classList.add('has-logo');
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Organization Logo Preview';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'contain';
+                
+                preview.appendChild(img);
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    // Remove logo function
+    function removeLogo() {
+        const input = document.getElementById('org_logo');
+        const preview = document.getElementById('logoPreview');
+        const fileInfo = document.getElementById('fileInfo');
+        
+        // Reset file input
+        input.value = '';
+        
+        // Hide file info
+        fileInfo.style.display = 'none';
+        
+        // Reset preview
+        preview.innerHTML = `
+            <i class="fas fa-building fa-3x text-muted"></i>
+            <p class="mt-2 mb-0 text-muted small">Logo Preview</p>
+        `;
+        preview.classList.remove('has-logo');
+    }
+    
+    // Format file size function
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Simulate upload progress (for demo purposes)
+    function simulateUploadProgress() {
+        const progressBar = document.getElementById('uploadProgress');
+        let width = 0;
+        
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+            } else {
+                width += 10;
+                progressBar.style.width = width + '%';
+                progressBar.textContent = width + '%';
+            }
+        }, 100);
+    }
+    
+    // Auto-format registration number
+    document.getElementById('regd_no').addEventListener('input', function(e) {
+        let value = e.target.value.toUpperCase();
+        value = value.replace(/[^A-Z0-9\/]/g, '');
+        e.target.value = value;
+    });
+    
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const regdNo = document.getElementById('regd_no').value;
+        const mobile = document.getElementById('mobile').value;
+        const logoFile = document.getElementById('org_logo').files[0];
+        
+        // Validate registration number format
+        if (!regdNo.match(/^TMIS\/\d+$/)) {
+            alert('Registration number must be in format: TMIS/01, TMIS/102, etc.');
+            e.preventDefault();
+            return;
+        }
+        
+        // Validate mobile number
+        if (!mobile.match(/^\d{10}$/)) {
+            alert('Mobile number must be exactly 10 digits');
+            e.preventDefault();
+            return;
+        }
+        
+        // Validate logo file size if uploaded
+        if (logoFile) {
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (logoFile.size > maxSize) {
+                alert('Logo file size exceeds 5MB limit. Please choose a smaller file.');
+                e.preventDefault();
+                return;
+            }
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'];
+            if (!validTypes.includes(logoFile.type)) {
+                alert('Invalid logo file type. Please use JPG, PNG, GIF, or SVG.');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+    
+    // Drag and drop functionality for logo
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoPreview = document.getElementById('logoPreview');
+        const fileInput = document.getElementById('org_logo');
+        
+        // Drag over event
+        logoPreview.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = '#3b82f6';
+            this.style.backgroundColor = '#f0f7ff';
+        });
+        
+        // Drag leave event
+        logoPreview.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.classList.contains('has-logo')) {
+                this.style.borderColor = '#cbd5e1';
+                this.style.backgroundColor = 'white';
+            }
+        });
+        
+        // Drop event
+        logoPreview.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            this.style.borderColor = this.classList.contains('has-logo') ? '#3b82f6' : '#cbd5e1';
+            this.style.backgroundColor = 'white';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                previewLogo({target: fileInput});
+            }
+        });
+        
+        // Click to upload
+        logoPreview.addEventListener('click', function() {
+            if (!this.classList.contains('has-logo')) {
+                fileInput.click();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}
