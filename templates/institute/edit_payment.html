@@ -6,13 +6,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 style="color: #1e3a8a;">
-                <i class="fas {% if title == 'Edit Expense' %}fa-edit{% else %}fa-minus-circle{% endif %} me-2"></i>{{ title }}
+                <i class="fas fa-edit me-2"></i>Edit Payment
             </h1>
             <p class="text-muted mb-0">
-                Student: {{ admission.student_name }} ({{ admission.admission_id }})
+                Student: {{ payment.admission.student_name }} ({{ payment.admission.admission_id }})
             </p>
         </div>
-        <a href="{% url 'student_account' admission.id %}" class="btn btn-outline-secondary">
+        <a href="{% url 'student_account' payment.admission.id %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Back to Account
         </a>
     </div>
@@ -26,21 +26,24 @@
                         {{ form.date|as_crispy_field }}
                     </div>
                     <div class="col-md-6">
-                        {{ form.category|as_crispy_field }}
+                        {{ form.payment_method|as_crispy_field }}
                     </div>
-                    <div class="col-md-12">
-                        {{ form.description|as_crispy_field }}
+                    <div class="col-md-6">
+                        {{ form.payment_type|as_crispy_field }}
                     </div>
                     <div class="col-md-6">
                         {{ form.amount|as_crispy_field }}
                     </div>
+                    <div class="col-md-12">
+                        {{ form.description|as_crispy_field }}
+                    </div>
                 </div>
                 
                 <div class="mt-4">
-                    <button type="submit" class="btn {% if title == 'Edit Expense' %}btn-warning{% else %}btn-danger{% endif %}">
-                        <i class="fas fa-save me-1"></i> {% if title == 'Edit Expense' %}Update{% else %}Save{% endif %} Expense
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Update Payment
                     </button>
-                    <a href="{% url 'student_account' admission.id %}" class="btn btn-secondary ms-2">
+                    <a href="{% url 'student_account' payment.admission.id %}" class="btn btn-secondary ms-2">
                         Cancel
                     </a>
                 </div>
