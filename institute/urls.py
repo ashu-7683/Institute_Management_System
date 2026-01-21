@@ -16,4 +16,15 @@ urlpatterns = [
     path('register-organization/', views.register_organization, name='register_organization'),
     path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
+    # Account Management URLs
+    path('account-section/', views.account_section, name='account_section'),
+    path('student-account/<int:admission_id>/', views.student_account, name='student_account'),
+    path('add-expense/<int:admission_id>/', views.add_expense, name='add_expense'),
+    path('add-payment/<int:admission_id>/', views.add_payment, name='add_payment'),
+    path('edit-expense/<int:expense_id>/', views.edit_expense, name='edit_expense'),
+    path('edit-payment/<int:payment_id>/', views.edit_payment, name='edit_payment'),
+    path('delete-expense/<int:expense_id>/', views.delete_expense, name='delete_expense'),
+    path('delete-payment/<int:payment_id>/', views.delete_payment, name='delete_payment'),
+    path('generate-receipt/<int:payment_id>/', views.generate_receipt, name='generate_receipt'),
+    path('account-report/<int:admission_id>/', views.account_report, name='account_report'),
 ]

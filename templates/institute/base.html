@@ -655,6 +655,13 @@
                         <span>Search Admission</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if 'account' in request.path %}active{% endif %}" 
+                        href="{% url 'account_section' %}">
+                        <i class="nav-icon fas fa-wallet"></i>
+                        <span>Account Section</span>
+                    </a>
+                </li>
                 {% endif %}
                 {% endif %}
                 

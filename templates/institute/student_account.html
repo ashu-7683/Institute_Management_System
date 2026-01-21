@@ -1,0 +1,292 @@
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 style="color: #1e3a8a;">
+                <i class="fas fa-user-graduate me-2"></i>Student Account
+            </h1>
+            <p class="text-muted mb-0">
+                {{ admission.student_name }} - {{ admission.admission_id }} - {{ admission.course }}
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'account_section' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <a href="{% url 'account_report' admission.id %}" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Download Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Account Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Expenses</h6>
+                            <h2 class="card-text text-danger">₹{{ total_expenses }}</h2>
+                        </div>
+                        <i class="fas fa-minus-circle fa-3x text-danger opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Total Payments</h6>
+                            <h2 class="card-text text-success">₹{{ total_payments }}</h2>
+                        </div>
+                        <i class="fas fa-plus-circle fa-3x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted">Current Balance</h6>
+                            <h2 class="card-text {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                ₹{{ balance }}
+                            </h2>
+                        </div>
+                        <i class="fas fa-wallet fa-3x {% if balance >= 0 %}text-success{% else %}text-danger{% endif %} opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex gap-2">
+                <a href="{% url 'add_expense' admission.id %}" class="btn btn-warning">
+                    <i class="fas fa-minus-circle me-1"></i> Add Expense
+                </a>
+                <a href="{% url 'add_payment' admission.id %}" class="btn btn-success">
+                    <i class="fas fa-plus-circle me-1"></i> Add Payment
+                </a>
+                <button class="btn btn-info" onclick="printAccount()">
+                    <i class="fas fa-print me-1"></i> Print Statement
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Expenses Section -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0" style="color: #1e3a8a;">
+                        <i class="fas fa-minus-circle text-danger me-2"></i>Expenses
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if expenses %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in expenses %}
+                                <tr>
+                                    <td>{{ expense.date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if expense.category == 'food' %}info{% elif expense.category == 'transport' %}warning{% else %}secondary{% endif %}">
+                                            {{ expense.get_category_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ expense.description|truncatechars:30 }}</td>
+                                    <td class="text-danger">₹{{ expense.amount }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'edit_expense' expense.id %}" 
+                                                class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger btn-sm delete-expense-btn" 
+                                                    data-expense-id="{{ expense.id }}"
+                                                    data-expense-desc="{{ expense.description }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-minus-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No expenses recorded</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payments Section -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0" style="color: #1e3a8a;">
+                        <i class="fas fa-plus-circle text-success me-2"></i>Payments Received
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if payments %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Receipt No.</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.date|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ payment.receipt_number }}</span>
+                                    </td>
+                                    <td>{{ payment.get_payment_type_display }}</td>
+                                    <td class="text-success">₹{{ payment.amount }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'generate_receipt' payment.id %}" 
+                                                class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-receipt"></i>
+                                            </a>
+                                            <a href="{% url 'edit_payment' payment.id %}" 
+                                                class="btn btn-outline-warning btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-outline-danger btn-sm delete-payment-btn" 
+                                                    data-payment-id="{{ payment.id }}"
+                                                    data-payment-receipt="{{ payment.receipt_number }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-plus-circle fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No payments received</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid rgba(0,0,0,.125);
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+        color: #1e3a8a;
+        font-weight: 600;
+        border-top: none;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+</style>
+
+<script>
+    function printAccount() {
+        window.open("{% url 'account_report' admission.id %}", "_blank");
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteMessage = document.getElementById('deleteMessage');
+        
+        // Expense delete
+        document.querySelectorAll('.delete-expense-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const expenseId = this.getAttribute('data-expense-id');
+                const expenseDesc = this.getAttribute('data-expense-desc');
+                
+                deleteMessage.textContent = `Are you sure you want to delete expense: "${expenseDesc}"?`;
+                deleteForm.action = `/delete-expense/${expenseId}/`;
+                
+                deleteModal.show();
+            });
+        });
+        
+        // Payment delete
+        document.querySelectorAll('.delete-payment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const paymentId = this.getAttribute('data-payment-id');
+                const paymentReceipt = this.getAttribute('data-payment-receipt');
+                
+                deleteMessage.textContent = `Are you sure you want to delete payment with receipt number: "${paymentReceipt}"?`;
+                deleteForm.action = `/delete-payment/${paymentId}/`;
+                
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

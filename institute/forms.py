@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser, Admission
+from .models import * 
 
 class UserRegistrationForm(UserCreationForm):
     user_type = forms.ChoiceField(choices=CustomUser.USER_TYPE_CHOICES, required=True)
@@ -31,7 +31,8 @@ class UserLoginForm(forms.Form):
     username = forms.CharField(max_length=150)
     password = forms.CharField(widget=forms.PasswordInput)
     
-# forms.py - ADD THIS TO AdmissionForm
+
+
 class AdmissionForm(forms.ModelForm):
     class Meta:
         model = Admission
@@ -42,4 +43,23 @@ class AdmissionForm(forms.ModelForm):
             'academics_accommodation': forms.Textarea(attrs={'rows': 3}),
             'student_image': forms.FileInput(attrs={'accept': 'image/*'}),
             'admission_id': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-control-plaintext'}),
+        }
+        
+        
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = ['date', 'category', 'description', 'amount']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 2}),
+        }
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payment
+        fields = ['date', 'payment_method', 'payment_type', 'description', 'amount']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 2}),
         }

@@ -7,10 +7,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib import messages
-from .models import CustomUser, Admission
-from .forms import UserRegistrationForm, AdmissionForm, UserLoginForm
-from django.db.models import Q
+from .models import *
+from .forms import *
+from django.db.models import Q, Sum
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+import io
 import json
 import re
 
@@ -89,6 +96,368 @@ def register_organization(request):
         return redirect('admin_dashboard')
     
     return render(request, 'institute/register_organization.html')
+
+
+
+@login_required
+def account_section(request):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    search_query = request.GET.get('search', '')
+    admissions = Admission.objects.all()
+    
+    if search_query:
+        admissions = admissions.filter(
+            Q(student_name__icontains=search_query) |
+            Q(admission_id__icontains=search_query) |
+            Q(mobile_number__icontains=search_query)
+        )
+    
+    # Calculate totals for each admission
+    admission_data = []
+    for admission in admissions:
+        total_expenses = Expense.objects.filter(admission=admission).aggregate(Sum('amount'))['amount__sum'] or 0
+        total_payments = Payment.objects.filter(admission=admission).aggregate(Sum('amount'))['amount__sum'] or 0
+        balance = total_payments - total_expenses
+        
+        admission_data.append({
+            'admission': admission,
+            'total_expenses': total_expenses,
+            'total_payments': total_payments,
+            'balance': balance
+        })
+    
+    context = {
+        'admission_data': admission_data,
+        'search_query': search_query,
+    }
+    return render(request, 'institute/account_section.html', context)
+
+@login_required
+def student_account(request, admission_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    admission = get_object_or_404(Admission, id=admission_id)
+    expenses = Expense.objects.filter(admission=admission).order_by('-date')
+    payments = Payment.objects.filter(admission=admission).order_by('-date')
+    
+    # Calculate totals
+    total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    balance = total_payments - total_expenses
+    
+    # Expenses by category
+    expenses_by_category = expenses.values('category').annotate(
+        total=Sum('amount')
+    ).order_by('-total')
+    
+    context = {
+        'admission': admission,
+        'expenses': expenses,
+        'payments': payments,
+        'total_expenses': total_expenses,
+        'total_payments': total_payments,
+        'balance': balance,
+        'expenses_by_category': expenses_by_category,
+    }
+    return render(request, 'institute/student_account.html', context)
+
+@login_required
+def add_expense(request, admission_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    admission = get_object_or_404(Admission, id=admission_id)
+    
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST)
+        if form.is_valid():
+            expense = form.save(commit=False)
+            expense.admission = admission
+            expense.added_by = request.user
+            expense.save()
+            messages.success(request, f'Expense of ₹{expense.amount} added successfully!')
+            return redirect('student_account', admission_id=admission_id)
+    else:
+        form = ExpenseForm()
+    
+    return render(request, 'institute/add_expense.html', {
+        'form': form,
+        'admission': admission
+    })
+
+@login_required
+def add_payment(request, admission_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    admission = get_object_or_404(Admission, id=admission_id)
+    
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.admission = admission
+            payment.received_by = request.user
+            payment.save()
+            messages.success(request, f'Payment of ₹{payment.amount} recorded successfully! Receipt: {payment.receipt_number}')
+            return redirect('student_account', admission_id=admission_id)
+    else:
+        form = PaymentForm()
+    
+    return render(request, 'institute/add_payment.html', {
+        'form': form,
+        'admission': admission
+    })
+
+@login_required
+def edit_expense(request, expense_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    expense = get_object_or_404(Expense, id=expense_id)
+    
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Expense updated successfully!')
+            return redirect('student_account', admission_id=expense.admission.id)
+    else:
+        form = ExpenseForm(instance=expense)
+    
+    return render(request, 'institute/edit_expense.html', {
+        'form': form,
+        'expense': expense
+    })
+
+@login_required
+def edit_payment(request, payment_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    payment = get_object_or_404(Payment, id=payment_id)
+    
+    if request.method == 'POST':
+        form = PaymentForm(request.POST, instance=payment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Payment updated successfully!')
+            return redirect('student_account', admission_id=payment.admission.id)
+    else:
+        form = PaymentForm(instance=payment)
+    
+    return render(request, 'institute/edit_payment.html', {
+        'form': form,
+        'payment': payment
+    })
+
+@login_required
+def delete_expense(request, expense_id):
+    if request.user.user_type != 'admin':
+        messages.error(request, 'Only admins can delete expenses.')
+        return redirect('account_section')
+    
+    if request.method == 'POST':
+        expense = get_object_or_404(Expense, id=expense_id)
+        admission_id = expense.admission.id
+        expense.delete()
+        messages.success(request, 'Expense deleted successfully!')
+        return redirect('student_account', admission_id=admission_id)
+    
+    return redirect('account_section')
+
+@login_required
+def delete_payment(request, payment_id):
+    if request.user.user_type != 'admin':
+        messages.error(request, 'Only admins can delete payments.')
+        return redirect('account_section')
+    
+    if request.method == 'POST':
+        payment = get_object_or_404(Payment, id=payment_id)
+        admission_id = payment.admission.id
+        payment.delete()
+        messages.success(request, 'Payment deleted successfully!')
+        return redirect('student_account', admission_id=admission_id)
+    
+    return redirect('account_section')
+
+@login_required
+def generate_receipt(request, payment_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    payment = get_object_or_404(Payment, id=payment_id)
+    
+    # Create PDF receipt
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    
+    styles = getSampleStyleSheet()
+    
+    # Header
+    elements.append(Paragraph("THE MOTHER INSTITUTE OF SCIENCE", styles['Title']))
+    elements.append(Paragraph("Trilochanpada, Jajpur Town, Near Maa Biraja Temple", styles['Normal']))
+    elements.append(Paragraph("Contact: +91 9439387324", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Receipt title
+    elements.append(Paragraph("PAYMENT RECEIPT", styles['Heading1']))
+    elements.append(Spacer(1, 20))
+    
+    # Receipt details
+    receipt_data = [
+        ['Receipt Number:', payment.receipt_number],
+        ['Date:', payment.date.strftime('%d/%m/%Y')],
+        ['Student Name:', payment.admission.student_name],
+        ['Admission ID:', payment.admission.admission_id],
+        ['Payment Type:', payment.get_payment_type_display()],
+        ['Payment Method:', payment.get_payment_method_display()],
+        ['Amount:', f'₹{payment.amount}'],
+        ['Description:', payment.description],
+        ['Received By:', payment.received_by.username if payment.received_by else ''],
+    ]
+    
+    receipt_table = Table(receipt_data, colWidths=[150, 300])
+    receipt_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+        ('PADDING', (0, 0), (-1, -1), 10),
+    ]))
+    
+    elements.append(receipt_table)
+    elements.append(Spacer(1, 30))
+    
+    # Signature
+    elements.append(Paragraph("Authorized Signature", styles['Normal']))
+    elements.append(Spacer(1, 50))
+    elements.append(Paragraph("_________________________", styles['Normal']))
+    
+    doc.build(elements)
+    
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="receipt_{payment.receipt_number}.pdf"'
+    
+    return response
+
+@login_required
+def account_report(request, admission_id):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    admission = get_object_or_404(Admission, id=admission_id)
+    expenses = Expense.objects.filter(admission=admission).order_by('date')
+    payments = Payment.objects.filter(admission=admission).order_by('date')
+    
+    # Calculate totals
+    total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+    total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+    balance = total_payments - total_expenses
+    
+    # Create PDF report
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    
+    styles = getSampleStyleSheet()
+    
+    # Header
+    elements.append(Paragraph("THE MOTHER INSTITUTE OF SCIENCE", styles['Title']))
+    elements.append(Paragraph("Account Statement", styles['Heading1']))
+    elements.append(Spacer(1, 20))
+    
+    # Student Info
+    student_info = [
+        ['Student Name:', admission.student_name],
+        ['Admission ID:', admission.admission_id],
+        ['Father\'s Name:', admission.father_name],
+        ['Course:', admission.course],
+        ['Mobile:', admission.mobile_number],
+    ]
+    
+    info_table = Table(student_info, colWidths=[150, 300])
+    info_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+        ('PADDING', (0, 0), (-1, -1), 5),
+    ]))
+    
+    elements.append(info_table)
+    elements.append(Spacer(1, 20))
+    
+    # Summary
+    summary_data = [
+        ['Total Expenses:', f'₹{total_expenses}'],
+        ['Total Payments:', f'₹{total_payments}'],
+        ['Balance:', f'₹{balance}']
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[150, 150])
+    summary_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
+        ('PADDING', (0, 0), (-1, -1), 10),
+    ]))
+    
+    elements.append(Paragraph("Account Summary", styles['Heading2']))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 20))
+    
+    # Expenses Table
+    elements.append(Paragraph("Expenses Details", styles['Heading2']))
+    expenses_data = [['Date', 'Category', 'Description', 'Amount']]
+    
+    for expense in expenses:
+        expenses_data.append([
+            expense.date.strftime('%d/%m/%Y'),
+            expense.get_category_display(),
+            expense.description,
+            f'₹{expense.amount}'
+        ])
+    
+    expenses_table = Table(expenses_data, colWidths=[80, 80, 200, 80])
+    expenses_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('PADDING', (0, 0), (-1, -1), 5),
+    ]))
+    
+    elements.append(expenses_table)
+    elements.append(Spacer(1, 20))
+    
+    # Payments Table
+    elements.append(Paragraph("Payments Details", styles['Heading2']))
+    payments_data = [['Date', 'Type', 'Method', 'Receipt No.', 'Amount']]
+    
+    for payment in payments:
+        payments_data.append([
+            payment.date.strftime('%d/%m/%Y'),
+            payment.get_payment_type_display(),
+            payment.get_payment_method_display(),
+            payment.receipt_number,
+            f'₹{payment.amount}'
+        ])
+    
+    payments_table = Table(payments_data, colWidths=[80, 80, 80, 80, 80])
+    payments_table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('PADDING', (0, 0), (-1, -1), 5),
+    ]))
+    
+    elements.append(payments_table)
+    
+    doc.build(elements)
+    
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="account_report_{admission.admission_id}.pdf"'
+    
+    return response
+
 
 
 @login_required

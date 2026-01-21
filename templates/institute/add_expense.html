@@ -1,0 +1,51 @@
+{% extends 'institute/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 style="color: #1e3a8a;">
+                <i class="fas fa-minus-circle me-2"></i>Add Expense
+            </h1>
+            <p class="text-muted mb-0">
+                Student: {{ admission.student_name }} ({{ admission.admission_id }})
+            </p>
+        </div>
+        <a href="{% url 'student_account' admission.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Account
+        </a>
+    </div>
+    
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.category|as_crispy_field }}
+                    </div>
+                    <div class="col-md-12">
+                        {{ form.description|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.amount|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-1"></i> Save Expense
+                    </button>
+                    <a href="{% url 'student_account' admission.id %}" class="btn btn-secondary ms-2">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
