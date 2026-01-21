@@ -111,3 +111,69 @@ class Admission(models.Model):
     def __str__(self):
         admission_id_display = self.admission_id if self.admission_id else f"ID:{self.id}"
         return f"{admission_id_display} - {self.student_name} - {self.enrolled_for}"
+    
+    
+    
+class Expense(models.Model):
+    admission = models.ForeignKey(Admission, on_delete=models.CASCADE, related_name='expenses')
+    date=models.DateField()
+    category = models.CharField(max_length=100, choices =[
+        ('food', 'Fooding'),
+        ('transport', 'Transportation'),
+        ('hostel', 'Hostel Fee'),
+        ('academic', 'Academic Material'),
+        ('other', 'Other'),
+    ])
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.admission.admission_id} - {self.category} - ₹{self.amount}"
+
+
+class Payment(models.Model):
+    admission = models.ForeignKey(Admission, on_delete=models.CASCADE, related_name='payments')
+    date = models.DateField()
+    payment_method = models.CharField(max_length=50, choices=[
+        ('cash', 'Cash'),
+        ('cheque', 'Cheque'),
+        ('online', 'Online Transfer'),
+        ('card', 'Card')
+    ])
+    payment_type = models.CharField(max_length=50, choices=[
+        ('tuition', 'Tuition Fee'),
+        ('hostel', 'Hostel Fee'),
+        ('transport', 'Transportation'),
+        ('library', 'Library'),
+        ('other', 'Other')
+    ])
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    receipt_number = models.CharField(max_length=50, unique=True, blank=True, null=True)
+    received_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        # Generate receipt number if not provided
+        if not self.receipt_number:
+            # Get the last payment to determine next number
+            last_payment = Payment.objects.order_by('-id').first()
+            if last_payment and last_payment.receipt_number:
+                try:
+                    # Extract number from existing receipt number
+                    last_number = int(last_payment.receipt_number[5:])  # Extract after "RECPT"
+                    next_number = last_number + 1
+                except:
+                    next_number = 1
+            else:
+                next_number = 1
+            
+            # Format: RECPT0001, RECPT0002, etc.
+            self.receipt_number = f"RECPT{next_number:04d}"
+        
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.admission.admission_id} - ₹{self.amount} - {self.payment_type}"

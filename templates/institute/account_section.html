@@ -1,0 +1,136 @@
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <h1 class="mb-4" style="color: #1e3a8a;">
+        <i class="fas fa-wallet me-2"></i>Account Management
+    </h1>
+    
+    <!-- Search Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{% url 'account_section' %}" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" 
+                                class="form-control" 
+                                name="search" 
+                                placeholder="Search by Student Name or Admission ID"
+                                value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Students Account Summary -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-list me-2 text-primary"></i>Students Account Summary
+            </h5>
+            
+            {% if admission_data %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Admission ID</th>
+                            <th>Student Name</th>
+                            <th>Course</th>
+                            <th>Total Expenses</th>
+                            <th>Total Payments</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in admission_data %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">{{ data.admission.admission_id|default:"None" }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ data.admission.student_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ data.admission.mobile_number }}</small>
+                            </td>
+                            <td>{{ data.admission.course }}</td>
+                            <td class="text-danger">₹{{ data.total_expenses }}</td>
+                            <td class="text-success">₹{{ data.total_payments }}</td>
+                            <td>
+                                <span class="badge bg-{% if data.balance >= 0 %}success{% else %}danger{% endif %}">
+                                    ₹{{ data.balance }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if data.balance >= 0 %}
+                                    <span class="badge bg-success">Credit</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Due</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'student_account' data.admission.id %}" 
+                                        class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="{% url 'add_expense' data.admission.id %}" 
+                                        class="btn btn-outline-warning">
+                                        <i class="fas fa-minus-circle"></i> Expense
+                                    </a>
+                                    <a href="{% url 'add_payment' data.admission.id %}" 
+                                        class="btn btn-outline-success">
+                                        <i class="fas fa-plus-circle"></i> Payment
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-wallet fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Students Found</h5>
+                <p class="text-muted">
+                    {% if search_query %}
+                    No students found for "{{ search_query }}". Try a different search term.
+                    {% else %}
+                    There are no students with account records.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .btn-group .btn {
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
