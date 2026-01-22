@@ -1,0 +1,149 @@
+{% extends 'institute/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="color: #1e3a8a;">
+            <i class="fas fa-building me-2"></i>Organization Settings
+        </h1>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="row">
+        <!-- Logo Preview Section -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-3">Current Logo</h5>
+                    
+                    {% if organization and organization.logo %}
+                        <img src="{{ organization.logo.url }}" 
+                                alt="{{ organization.name }}" 
+                                class="img-fluid mb-3" 
+                                style="max-height: 200px; object-fit: contain;">
+                        <p class="text-muted small">
+                            Current logo for {{ organization.name }}
+                        </p>
+                    {% else %}
+                        <div class="border rounded p-5 bg-light mb-3">
+                            <i class="fas fa-building fa-4x text-muted"></i>
+                            <p class="mt-3 text-muted">No logo uploaded</p>
+                        </div>
+                        <p class="text-muted small">
+                            Upload a logo to display in the header
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Organization Form Section -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form.logo|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.registration_number|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.registration_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.mobile|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.organization_type|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.contact_person|as_crispy_field }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form.address|as_crispy_field }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form.remarks|as_crispy_field }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Settings
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ms-2">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.logo-preview {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.logo-preview:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+}
+
+.logo-preview img {
+    max-width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoInput = document.getElementById('id_logo');
+    const logoPreview = document.querySelector('.logo-preview');
+    
+    if (logoInput) {
+        logoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (logoPreview.querySelector('img')) {
+                        logoPreview.querySelector('img').src = e.target.result;
+                    } else {
+                        logoPreview.innerHTML = `<img src="${e.target.result}" alt="Logo Preview" class="img-fluid">`;
+                    }
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.conf import settings
 from .models import *
 from .forms import *
 from django.db.models import Q, Sum
@@ -20,6 +21,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 import io
 import json
 import re
+from datetime import datetime
 
 def home(request):
     return render(request, 'institute/index.html')
@@ -98,7 +100,6 @@ def register_organization(request):
     return render(request, 'institute/register_organization.html')
 
 
-
 @login_required
 def account_section(request):
     if request.user.user_type != 'admin':
@@ -116,10 +117,16 @@ def account_section(request):
     
     # Calculate totals for each admission
     admission_data = []
+    total_payments_sum = 0
+    total_expenses_sum = 0
+    
     for admission in admissions:
         total_expenses = Expense.objects.filter(admission=admission).aggregate(Sum('amount'))['amount__sum'] or 0
         total_payments = Payment.objects.filter(admission=admission).aggregate(Sum('amount'))['amount__sum'] or 0
         balance = total_payments - total_expenses
+        
+        total_payments_sum += total_payments
+        total_expenses_sum += total_expenses
         
         admission_data.append({
             'admission': admission,
@@ -128,9 +135,14 @@ def account_section(request):
             'balance': balance
         })
     
+    net_balance = total_payments_sum - total_expenses_sum
+    
     context = {
         'admission_data': admission_data,
         'search_query': search_query,
+        'total_payments_sum': total_payments_sum,
+        'total_expenses_sum': total_expenses_sum,
+        'net_balance': net_balance,
     }
     return render(request, 'institute/account_section.html', context)
 
@@ -344,6 +356,7 @@ def generate_receipt(request, payment_id):
     
     return response
 
+
 @login_required
 def account_report(request, admission_id):
     if request.user.user_type != 'admin':
@@ -358,108 +371,325 @@ def account_report(request, admission_id):
     total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
     balance = total_payments - total_expenses
     
-    # Create PDF report
+    # Create ledger data
+    ledger_data = []
+    running_balance = 0
+    
+    # Combine and sort all transactions by date
+    all_transactions = []
+    
+    for expense in expenses:
+        all_transactions.append({
+            'date': expense.date,
+            'type': 'Expense',
+            'category': expense.get_category_display(),
+            'amount': -expense.amount,
+            'description': expense.description
+        })
+    
+    for payment in payments:
+        all_transactions.append({
+            'date': payment.date,
+            'type': 'Payment',
+            'category': payment.get_payment_type_display(),
+            'amount': payment.amount,
+            'description': payment.description,
+            'receipt_no': payment.receipt_number,
+            'method': payment.get_payment_method_display()
+        })
+    
+    # Sort transactions by date
+    all_transactions.sort(key=lambda x: x['date'])
+    
+    # Calculate running balance
+    for transaction in all_transactions:
+        running_balance += transaction['amount']
+        ledger_data.append({
+            'date': transaction['date'],
+            'type': transaction['type'],
+            'category': transaction['category'],
+            'amount': abs(transaction['amount']),
+            'description': transaction['description'],
+            'balance': running_balance,
+            'receipt_no': transaction.get('receipt_no', ''),
+            'method': transaction.get('method', '')
+        })
+    
+    # Create PDF report with new design
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter)
     elements = []
     
     styles = getSampleStyleSheet()
     
-    # Header
-    elements.append(Paragraph("THE MOTHER INSTITUTE OF SCIENCE", styles['Title']))
-    elements.append(Paragraph("Account Statement", styles['Heading1']))
-    elements.append(Spacer(1, 20))
+    # Header with logo and institute details
+    header_data = [
+        ["THE MOTHER INSTITUTE OF SCIENCE"],
+        ["Account Ledger Report"],
+        ["Generated on: " + datetime.now().strftime("%d/%m/%Y %H:%M:%S")]
+    ]
     
-    # Student Info
+    header_table = Table(header_data)
+    header_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (0, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (0, 0), 16),
+        ('FONTSIZE', (0, 1), (0, 1), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    
+    elements.append(header_table)
+    elements.append(Spacer(1, 10))
+    
+    # Student Information Section
     student_info = [
-        ['Student Name:', admission.student_name],
-        ['Admission ID:', admission.admission_id],
-        ['Father\'s Name:', admission.father_name],
-        ['Course:', admission.course],
-        ['Mobile:', admission.mobile_number],
+        ["Student Details", "Contact Information", "Academic Information"],
+        [
+            f"Name: {admission.student_name}\n"
+            f"Father: {admission.father_name}\n"
+            f"Admission ID: {admission.admission_id}",
+            
+            f"Mobile: {admission.mobile_number}\n"
+            f"Address: {admission.address[:50]}...",
+            
+            f"Course: {admission.course}\n"
+        ]
     ]
     
-    info_table = Table(student_info, colWidths=[150, 300])
-    info_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-        ('PADDING', (0, 0), (-1, -1), 5),
-    ]))
-    
-    elements.append(info_table)
-    elements.append(Spacer(1, 20))
-    
-    # Summary
-    summary_data = [
-        ['Total Expenses:', f'₹{total_expenses}'],
-        ['Total Payments:', f'₹{total_payments}'],
-        ['Balance:', f'₹{balance}']
-    ]
-    
-    summary_table = Table(summary_data, colWidths=[150, 150])
-    summary_table.setStyle(TableStyle([
+    student_table = Table(student_info, colWidths=[180, 180, 180])
+    student_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('BACKGROUND', (0, 0), (0, -1), colors.lightgrey),
-        ('PADDING', (0, 0), (-1, -1), 10),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('PADDING', (0, 0), (-1, -1), 6),
     ]))
     
-    elements.append(Paragraph("Account Summary", styles['Heading2']))
+    elements.append(student_table)
+    elements.append(Spacer(1, 15))
+    
+    # Summary Section
+    summary_data = [
+        ["Total Payments", "Total Expenses", "Current Balance"],
+        [f"₹{total_payments:.2f}", f"₹{total_expenses:.2f}", f"₹{balance:.2f}"]
+    ]
+    
+    summary_table = Table(summary_data, colWidths=[180, 180, 180])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e3a8a')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 1), (-1, 1), 14),
+        ('FONTNAME', (0, 1), (-1, 1), 'Helvetica-Bold'),
+        ('PADDING', (0, 0), (-1, -1), 8),
+    ]))
+    
     elements.append(summary_table)
     elements.append(Spacer(1, 20))
     
-    # Expenses Table
-    elements.append(Paragraph("Expenses Details", styles['Heading2']))
-    expenses_data = [['Date', 'Category', 'Description', 'Amount']]
+    # Ledger Title
+    elements.append(Paragraph("Transaction Ledger", styles['Heading2']))
+    elements.append(Spacer(1, 10))
     
-    for expense in expenses:
-        expenses_data.append([
-            expense.date.strftime('%d/%m/%Y'),
-            expense.get_category_display(),
-            expense.description,
-            f'₹{expense.amount}'
-        ])
+    # Ledger Table
+    if ledger_data:
+        ledger_table_data = [
+            ["Date", "Type", "Category", "Description", "Amount", "Balance", "Receipt/Method"]
+        ]
+        
+        for entry in ledger_data:
+            # Determine amount color and sign
+            if entry['type'] == 'Payment':
+                amount_display = f"₹{entry['amount']:.2f}"
+                amount_color = colors.green
+            else:
+                amount_display = f"-₹{entry['amount']:.2f}"
+                amount_color = colors.red
+            
+            # Determine balance color
+            if entry['balance'] >= 0:
+                balance_color = colors.green
+            else:
+                balance_color = colors.red
+            
+            # Add receipt info for payments
+            if entry['type'] == 'Payment':
+                receipt_info = f"Receipt: {entry['receipt_no']}\nMethod: {entry['method']}"
+            else:
+                receipt_info = "-"
+            
+            ledger_table_data.append([
+                entry['date'].strftime("%d/%m/%Y"),
+                entry['type'],
+                entry['category'],
+                entry['description'][:30],
+                amount_display,
+                f"₹{entry['balance']:.2f}",
+                receipt_info
+            ])
+        
+        # Create ledger table
+        ledger_table = Table(ledger_table_data, colWidths=[60, 60, 70, 120, 70, 80, 100])
+        ledger_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('PADDING', (0, 0), (-1, -1), 4),
+        ]))
+        
+        # Apply conditional formatting for amounts
+        row_index = 1
+        for entry in ledger_data:
+            if entry['type'] == 'Payment':
+                ledger_table.setStyle(TableStyle([
+                    ('TEXTCOLOR', (4, row_index), (4, row_index), colors.green),
+                ]))
+            else:
+                ledger_table.setStyle(TableStyle([
+                    ('TEXTCOLOR', (4, row_index), (4, row_index), colors.red),
+                ]))
+            
+            if entry['balance'] >= 0:
+                ledger_table.setStyle(TableStyle([
+                    ('TEXTCOLOR', (5, row_index), (5, row_index), colors.green),
+                ]))
+            else:
+                ledger_table.setStyle(TableStyle([
+                    ('TEXTCOLOR', (5, row_index), (5, row_index), colors.red),
+                ]))
+            
+            row_index += 1
+        
+        elements.append(ledger_table)
+    else:
+        elements.append(Paragraph("No transactions recorded.", styles['Normal']))
     
-    expenses_table = Table(expenses_data, colWidths=[80, 80, 200, 80])
-    expenses_table.setStyle(TableStyle([
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('PADDING', (0, 0), (-1, -1), 5),
-    ]))
-    
-    elements.append(expenses_table)
     elements.append(Spacer(1, 20))
     
-    # Payments Table
-    elements.append(Paragraph("Payments Details", styles['Heading2']))
-    payments_data = [['Date', 'Type', 'Method', 'Receipt No.', 'Amount']]
+    # Footer with signatures
+    footer_data = [
+        ["Prepared By:", "Checked By:", "Approved By:"],
+        ["_________________________", "_________________________", "_________________________"],
+        [request.user.username, "Accountant", "Director"]
+    ]
     
-    for payment in payments:
-        payments_data.append([
-            payment.date.strftime('%d/%m/%Y'),
-            payment.get_payment_type_display(),
-            payment.get_payment_method_display(),
-            payment.receipt_number,
-            f'₹{payment.amount}'
-        ])
-    
-    payments_table = Table(payments_data, colWidths=[80, 80, 80, 80, 80])
-    payments_table.setStyle(TableStyle([
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
-        ('PADDING', (0, 0), (-1, -1), 5),
+    footer_table = Table(footer_data, colWidths=[180, 180, 180])
+    footer_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 20),
     ]))
     
-    elements.append(payments_table)
+    elements.append(footer_table)
     
+    # Build PDF
     doc.build(elements)
     
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="account_report_{admission.admission_id}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="account_ledger_{admission.admission_id}.pdf"'
     
     return response
 
+# In views.py - Add this new view
 
-
+@login_required
+def account_search_view(request):
+    if request.user.user_type != 'admin':
+        return redirect('home')
+    
+    search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    category = request.GET.get('category', '')
+    
+    admissions = Admission.objects.all()
+    
+    if search_query:
+        admissions = admissions.filter(
+            Q(student_name__icontains=search_query) |
+            Q(admission_id__icontains=search_query) |
+            Q(mobile_number__icontains=search_query)
+        )
+    
+    # Calculate totals for each admission with filters
+    admission_data = []
+    total_payments_sum = 0
+    total_expenses_sum = 0
+    
+    for admission in admissions:
+        expenses = Expense.objects.filter(admission=admission)
+        payments = Payment.objects.filter(admission=admission)
+        
+        # Apply date filters if provided
+        if date_from:
+            try:
+                from_date = datetime.strptime(date_from, '%Y-%m-%d').date()
+                expenses = expenses.filter(date__gte=from_date)
+                payments = payments.filter(date__gte=from_date)
+            except:
+                pass
+        
+        if date_to:
+            try:
+                to_date = datetime.strptime(date_to, '%Y-%m-%d').date()
+                expenses = expenses.filter(date__lte=to_date)
+                payments = payments.filter(date__lte=to_date)
+            except:
+                pass
+        
+        # Apply category filter if provided
+        if category:
+            if category.startswith('expense_'):
+                expense_category = category.replace('expense_', '')
+                expenses = expenses.filter(category=expense_category)
+            elif category.startswith('payment_'):
+                payment_category = category.replace('payment_', '')
+                payments = payments.filter(payment_type=payment_category)
+        
+        total_expenses = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_payments = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+        balance = total_payments - total_expenses
+        
+        total_payments_sum += total_payments
+        total_expenses_sum += total_expenses
+        
+        admission_data.append({
+            'admission': admission,
+            'total_expenses': total_expenses,
+            'total_payments': total_payments,
+            'balance': balance,
+            'expenses_count': expenses.count(),
+            'payments_count': payments.count()
+        })
+    
+    net_balance = total_payments_sum - total_expenses_sum
+    
+    context = {
+        'admission_data': admission_data,
+        'search_query': search_query,
+        'date_from': date_from,
+        'date_to': date_to,
+        'category': category,
+        'total_payments_sum': total_payments_sum,
+        'total_expenses_sum': total_expenses_sum,
+        'net_balance': net_balance,
+        'expense_categories': Expense._meta.get_field('category').choices,
+        'payment_categories': Payment._meta.get_field('payment_type').choices,
+    }
+    return render(request, 'institute/account_search.html', context)
+    
 @login_required
 def admin_dashboard(request):
     if request.user.user_type != 'admin':
@@ -855,3 +1085,61 @@ def register_user(request):
         form = UserRegistrationForm()
     
     return render(request, 'institute/register.html', {'form': form})
+
+def get_active_organization(request):
+    """Get the active organization for the current user/session"""
+    # In your case, you might have only one organization
+    # You can modify this based on your requirements
+    try:
+        organization = Organization.objects.filter(status='active').first()
+        return organization
+    except:
+        return None
+
+# Add this function to views.py
+
+def organization_settings(request):
+    """View for managing organization settings"""
+    if not request.user.is_authenticated or request.user.user_type != 'admin':
+        return redirect('login')
+    
+    # Try to get existing organization
+    try:
+        organization = Organization.objects.filter(status='active').first()
+    except:
+        organization = None
+    
+    if request.method == 'POST':
+        if organization:
+            form = OrganizationForm(request.POST, request.FILES, instance=organization)
+        else:
+            form = OrganizationForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            org = form.save(commit=False)
+            org.status = 'active'
+            org.save()
+            messages.success(request, 'Organization settings updated successfully!')
+            return redirect('organization_settings')
+    else:
+        if organization:
+            form = OrganizationForm(instance=organization)
+        else:
+            form = OrganizationForm()
+    
+    context = {
+        'organization': organization,
+        'form': form,
+    }
+    return render(request, 'institute/organization_settings.html', context)
+
+# Add this context processor function
+def organization_context(request):
+    """Context processor to add organization data to all templates"""
+    try:
+        organization = Organization.objects.filter(status='active').first()
+    except:
+        organization = None
+    return {
+        'organization': organization,
+    }

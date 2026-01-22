@@ -144,6 +144,7 @@ class Payment(models.Model):
     ])
     payment_type = models.CharField(max_length=50, choices=[
         ('tuition', 'Tuition Fee'),
+        ('food', 'Fooding'),
         ('hostel', 'Hostel Fee'),
         ('transport', 'Transportation'),
         ('library', 'Library'),
@@ -177,3 +178,34 @@ class Payment(models.Model):
     
     def __str__(self):
         return f"{self.admission.admission_id} - ₹{self.amount} - {self.payment_type}"
+    
+class Organization(models.Model):
+    name = models.CharField(max_length=200, unique=True, verbose_name="Organization Name")
+    logo = models.ImageField(upload_to='organization_logos/', null=True, blank=True, verbose_name="Logo")
+    address = models.TextField(verbose_name="Address")
+    mobile = models.CharField(max_length=15, verbose_name="Mobile Number")
+    email = models.EmailField(verbose_name="Email Address")
+    registration_number = models.CharField(max_length=100, unique=True, verbose_name="Registration Number")
+    registration_date = models.DateField(null=True, blank=True, verbose_name="Registration Date")
+    contact_person = models.CharField(max_length=100, blank=True, verbose_name="Contact Person")
+    organization_type = models.CharField(max_length=100, blank=True, verbose_name="Organization Type")
+    remarks = models.TextField(blank=True, verbose_name="Remarks")
+    status = models.CharField(
+        max_length=20, 
+        choices=[
+            ('active', 'Active'),
+            ('inactive', 'Inactive')
+        ], 
+        default='active',
+        verbose_name="Status"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = "Organization"
+        verbose_name_plural = "Organizations"

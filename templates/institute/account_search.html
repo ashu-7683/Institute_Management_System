@@ -1,0 +1,384 @@
+<!-- Create new file: institute/templates/institute/account_search.html -->
+
+{% extends 'institute/base.html' %}
+
+{% block content %}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="color: #1e3a8a;">
+            <i class="fas fa-search-dollar me-2"></i>Advanced Account Search
+        </h1>
+        <a href="{% url 'account_section' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Simple View
+        </a>
+    </div>
+    
+    <!-- Advanced Search Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-filter me-2 text-primary"></i>Advanced Filters
+            </h5>
+            
+            <form method="GET" action="{% url 'account_search' %}" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Student Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" 
+                                class="form-control" 
+                                name="search" 
+                                placeholder="Name, ID, or Mobile"
+                                value="{{ search_query }}">
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Date From</label>
+                    <input type="date" 
+                            class="form-control" 
+                            name="date_from" 
+                            value="{{ date_from }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Date To</label>
+                    <input type="date" 
+                            class="form-control" 
+                            name="date_to" 
+                            value="{{ date_to }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" name="category">
+                        <option value="">All Categories</option>
+                        <optgroup label="Expense Categories">
+                            {% for value, label in expense_categories %}
+                            <option value="expense_{{ value }}" {% if category == "expense_"|add:value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        <optgroup label="Payment Categories">
+                            {% for value, label in payment_categories %}
+                            <option value="payment_{{ value }}" {% if category == "payment_"|add:value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-between mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Apply Filters
+                        </button>
+                        <a href="{% url 'account_search' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Clear Filters
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Statistics Summary -->
+    {% if admission_data %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Accounts</h6>
+                    <h3>{{ admission_data|length }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Balance</h6>
+                    <h3 class="{% if total_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ₹{{ total_balance|default:"0" }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Payments</h6>
+                    <h3 class="text-success">₹{{ total_payments_sum|default:"0" }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Expenses</h6>
+                    <h3 class="text-danger">₹{{ total_expenses_sum|default:"0" }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Account Ledger Results -->
+    {% if admission_data %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="fas fa-list-alt me-2 text-success"></i>Account Ledgers ({{ admission_data|length }} found)
+            </h5>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Admission ID</th>
+                            <th>Student Details</th>
+                            <th>Course</th>
+                            <th class="text-end">Payments</th>
+                            <th class="text-end">Expenses</th>
+                            <th class="text-end">Balance</th>
+                            <th class="text-center">Transactions</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in admission_data %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">{{ data.admission.admission_id }}</span>
+                                <br>
+                                <small class="text-muted">{{ data.admission.mobile_number }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ data.admission.student_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ data.admission.father_name }}</small>
+                            </td>
+                            <td>{{ data.admission.course }}</td>
+                            <td class="text-end text-success">
+                                ₹{{ data.total_payments }}
+                                <br>
+                                <small class="text-muted">({{ data.payments_count }} payment{{ data.payments_count|pluralize:"s" }})</small>
+                            </td>
+                            <td class="text-end text-danger">
+                                ₹{{ data.total_expenses }}
+                                <br>
+                                <small class="text-muted">({{ data.expenses_count }} expense{{ data.expenses_count|pluralize:"s" }})</small>
+                            </td>
+                            <td class="text-end">
+                                <span class="badge bg-{% if data.balance >= 0 %}success{% else %}danger{% endif %}">
+                                    ₹{{ data.balance }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-info" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#transactions{{ data.admission.id }}">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'student_account' data.admission.id %}" 
+                                        class="btn btn-outline-primary">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </a>
+                                    <a href="{% url 'account_report' data.admission.id %}" 
+                                        class="btn btn-outline-success">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    <a href="{% url 'add_payment' data.admission.id %}" 
+                                        class="btn btn-outline-success">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </a>
+                                    <a href="{% url 'add_expense' data.admission.id %}" 
+                                        class="btn btn-outline-danger">
+                                        <i class="fas fa-minus-circle"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Transaction Details Row -->
+                        <tr class="collapse" id="transactions{{ data.admission.id }}">
+                            <td colspan="8">
+                                <div class="p-3 bg-light">
+                                    <h6>Recent Transactions for {{ data.admission.student_name }}</h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-success">Recent Payments:</h6>
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Receipt</th>
+                                                        <th>Type</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for payment in data.admission.payments.all|slice:":5" %}
+                                                    <tr>
+                                                        <td>{{ payment.date|date:"d/m/Y" }}</td>
+                                                        <td><span class="badge bg-info">{{ payment.receipt_number }}</span></td>
+                                                        <td>{{ payment.get_payment_type_display }}</td>
+                                                        <td class="text-success">₹{{ payment.amount }}</td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" class="text-muted">No payments</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <h6 class="text-danger">Recent Expenses:</h6>
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Category</th>
+                                                        <th>Description</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for expense in data.admission.expenses.all|slice:":5" %}
+                                                    <tr>
+                                                        <td>{{ expense.date|date:"d/m/Y" }}</td>
+                                                        <td>{{ expense.get_category_display }}</td>
+                                                        <td>{{ expense.description|truncatechars:30 }}</td>
+                                                        <td class="text-danger">₹{{ expense.amount }}</td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="4" class="text-muted">No expenses</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Export Options -->
+            <div class="mt-4">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span class="text-muted me-3">
+                            Showing {{ admission_data|length }} of {{ total_admissions }} accounts
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">No Accounts Found</h5>
+            <p class="text-muted">
+                {% if search_query or date_from or date_to or category %}
+                No accounts match your search criteria. Try different filters.
+                {% else %}
+                No student accounts found. Add admissions to see account data.
+                {% endif %}
+            </p>
+            <a href="{% url 'admission_form' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Create New Admission
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .collapse-row {
+        background-color: #f8f9fa !important;
+    }
+    
+    .card {
+        border: 1px solid rgba(0,0,0,.125);
+    }
+    
+    .form-label {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    @media print {
+        .btn, .collapse {
+            display: none !important;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default date values for date inputs
+        const today = new Date().toISOString().split('T')[0];
+        const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 2)
+                            .toISOString().split('T')[0];
+        
+        // Set date_from to first of current month if empty
+        const dateFromInput = document.querySelector('input[name="date_from"]');
+        if (dateFromInput && !dateFromInput.value) {
+            dateFromInput.value = firstOfMonth;
+        }
+        
+        // Set date_to to today if empty
+        const dateToInput = document.querySelector('input[name="date_to"]');
+        if (dateToInput && !dateToInput.value) {
+            dateToInput.value = today;
+        }
+        
+        // Focus on search input
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.focus();
+        }
+        
+        // Auto-submit form when category changes
+        const categorySelect = document.querySelector('select[name="category"]');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                if (this.value) {
+                    this.form.submit();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

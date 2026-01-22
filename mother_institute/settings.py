@@ -40,7 +40,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'mother_institute.urls'
+ROOT_URLCONF = 'mother_institute.urls' 
 
 TEMPLATES = [
     {
@@ -53,6 +53,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'institute.views.organization_context',
             ],
         },
     },

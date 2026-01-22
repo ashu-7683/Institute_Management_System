@@ -31,6 +31,24 @@
         </div>
     </div>
     
+    <!-- NEW: Advanced Search Section -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'account_search' %}" class="btn btn-outline-info">
+                        <i class="fas fa-chart-line me-1"></i> Advanced Search & Analytics
+                    </a>
+                </div>
+                <div>
+                    <span class="badge bg-primary">
+                        {{ admission_data|length }} Account{{ admission_data|length|pluralize:"s" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Students Account Summary -->
     <div class="card border-0 shadow-sm">
         <div class="card-body">
@@ -93,12 +111,40 @@
                                         class="btn btn-outline-success">
                                         <i class="fas fa-plus-circle"></i> Payment
                                     </a>
+                                    <a href="{% url 'account_report' data.admission.id %}" 
+                                        class="btn btn-outline-info">
+                                        <i class="fas fa-file-pdf"></i> PDF
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Quick Stats Footer -->
+            <div class="mt-4 pt-3 border-top">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">Total Students</small>
+                        <h5 class="mb-0">{{ admission_data|length }}</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">Total Payments</small>
+                        <h5 class="mb-0 text-success">₹{{ total_payments_sum|default:"0" }}</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">Total Expenses</small>
+                        <h5 class="mb-0 text-danger">₹{{ total_expenses_sum|default:"0" }}</h5>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">Net Balance</small>
+                        <h5 class="mb-0 {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ₹{{ net_balance|default:"0" }}
+                        </h5>
+                    </div>
+                </div>
             </div>
             {% else %}
             <div class="text-center py-5">
@@ -111,6 +157,11 @@
                     There are no students with account records.
                     {% endif %}
                 </p>
+                {% if not search_query %}
+                <a href="{% url 'admission_form' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle me-1"></i> Create New Admission
+                </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -132,5 +183,47 @@
     .btn-group .btn {
         border-radius: 4px;
     }
+    
+    .border-top {
+        border-top: 1px solid #dee2e6 !important;
+    }
+    
+    .btn-outline-info {
+        border-color: #0dcaf0;
+        color: #0dcaf0;
+    }
+    
+    .btn-outline-info:hover {
+        background-color: #0dcaf0;
+        color: white;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click event for quick view modal
+        const viewButtons = document.querySelectorAll('.btn-outline-primary');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const admissionId = this.href.split('/').slice(-2, -1)[0];
+                console.log('Viewing account for admission ID:', admissionId);
+            });
+        });
+        
+        // Auto-focus search input if there's a search query
+        {% if search_query %}
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+        {% endif %}
+        
+        // Add tooltips to action buttons
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 {% endblock %}

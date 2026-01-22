@@ -63,3 +63,20 @@ class PaymentForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'rows': 2}),
         }
+        
+class OrganizationForm(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ['name', 'logo', 'address', 'mobile', 'email', 
+                    'registration_number', 'registration_date',
+                    'contact_person', 'organization_type', 'remarks', 'status']
+        widgets = {
+            'address': forms.Textarea(attrs={'rows': 3}),
+            'remarks': forms.Textarea(attrs={'rows': 3}),
+            'registration_date': forms.DateInput(attrs={'type': 'date'}),
+            'logo': forms.FileInput(attrs={'accept': 'image/*'}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['logo'].help_text = 'Recommended size: 200x200px, Max size: 2MB'
